@@ -4,12 +4,12 @@
  */
 
 // ===== Components =====
-export { ProfileSettings } from './components/ProfileSettings'
-export { PasswordSettings } from './components/PasswordSettings'
-export { NotificationPreferences } from './components/NotificationPreferences'
-export { DevicesSettings } from './components/DevicesSettings'
-// Add to existing exports
+export { ProfileSettings } from './components/ProfileSettings/ProfileSettings'
+export { PasswordSettings } from './components/PasswordSettings/PasswordSettings'
+export { NotificationPreferences } from './components/NotificationPreferences/NotificationPreferences'
+export { DevicesSettings } from './components/DevicesSettings/DevicesSettings'
 export { default as SavedAddresses } from './components/SavedAddresses/SavedAddresses'
+
 // ===== Hooks =====
 export { useSettings } from './hooks/useSettings'
 

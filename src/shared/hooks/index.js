@@ -16,8 +16,6 @@ export { useSessionStorage } from './useSessionStorage'
 export { useSocket } from './useSocket'
 export { useTheme } from './useTheme'
 export { useWindowSize } from './useWindowSize'
-
-// If you have existing ones, also export them:
 export { useAuth } from './useAuth'
 export { useLanguage } from './useLanguage'
 export { useNotification } from './useNotification'
