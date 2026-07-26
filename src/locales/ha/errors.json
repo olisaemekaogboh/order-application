@@ -1,0 +1,12 @@
+{
+  "network_error": "Kuskuren hanyar sadarwa. Da fatan za a duba haɗin ku.",
+  "server_error": "Kuskuren uwar garken. Da fatan za a sake gwadawa daga baya.",
+  "unauthorized": "Shiga ba tare da izini ba. Da fatan za a sake shiga.",
+  "not_found": "Ba a sami abin da ake nema ba.",
+  "validation_error": "Kuskuren tabbatarwa. Da fatan za a duba abin da kuka shigar.",
+  "generic_error": "Kuskure ya faru. Da fatan za a sake gwadawa.",
+  "required": "Ana buƙatar wannan",
+  "invalid_email": "Imel mara inganci",
+  "invalid_phone": "Lambar waya mara inganci",
+  "password_mismatch": "Kalmar sirri ba ta dace ba"
+}

@@ -1,0 +1,8 @@
+{
+  "network_error": "Network error. Please check your connection.",
+  "server_error": "Server error. Please try again later.",
+  "unauthorized": "Unauthorized access. Please login again.",
+  "not_found": "Resource not found.",
+  "validation_error": "Validation error. Please check your input.",
+  "generic_error": "An error occurred. Please try again."
+}

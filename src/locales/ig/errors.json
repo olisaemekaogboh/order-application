@@ -1,0 +1,12 @@
+{
+  "network_error": "Njehie netwọk. Biko lelee njikọ gị.",
+  "server_error": "Njehie sava. Biko nwaa ọzọ ma emechaa.",
+  "unauthorized": "Ịbanye na-enweghị ikike. Biko banye ọzọ.",
+  "not_found": "Achọtaghị ihe ị na-achọ.",
+  "validation_error": "Njehie nkwenye. Biko lelee ihe ị tinyere.",
+  "generic_error": "Njehie mere. Biko nwaa ọzọ.",
+  "required": "Achọrọ nke a",
+  "invalid_email": "Email ezighi ezi",
+  "invalid_phone": "Nọmba ekwentị ezighi ezi",
+  "password_mismatch": "Okwuntughe adakọghị"
+}

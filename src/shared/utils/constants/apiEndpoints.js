@@ -1,0 +1,50 @@
+export const API_ENDPOINTS = {
+  AUTH: {
+    LOGIN: "/auth/login",
+    REGISTER: "/auth/register",
+    GOOGLE: "/auth/google",
+    REFRESH: "/auth/refresh",
+    LOGOUT: "/auth/logout",
+    FORGOT_PASSWORD: "/auth/forgot-password",
+    RESET_PASSWORD: "/auth/reset-password",
+    VERIFY_EMAIL: "/auth/verify-email",
+    ME: "/auth/me",
+  },
+  ORDERS: {
+    BASE: "/orders",
+    CALCULATE_PRICE: "/orders/calculate-price",
+    MY_ORDERS: "/orders/my-orders",
+    ALL: "/orders/all",
+    ASSIGN_DRIVER: "/orders/assign-driver",
+  },
+  DRIVERS: {
+    BASE: "/drivers",
+    AVAILABLE: "/drivers/available",
+    EARNINGS: "/drivers/earnings",
+  },
+  REVENUE: {
+    BASE: "/revenue",
+    REPORT: "/revenue/report",
+    DAILY: "/revenue/daily",
+    WEEKLY: "/revenue/weekly",
+    MONTHLY: "/revenue/monthly",
+    YEARLY: "/revenue/yearly",
+  },
+  ADMIN: {
+    BASE: "/admin",
+    DASHBOARD: "/admin/dashboard",
+    USERS: "/admin/users",
+    PRICING: "/admin/pricing",
+    AUDIT_LOGS: "/admin/audit-logs",
+  },
+  USERS: {
+    PROFILE: "/users/profile",
+    ADDRESSES: "/users/addresses",
+    CHANGE_PASSWORD: "/users/change-password",
+  },
+  NOTIFICATIONS: {
+    BASE: "/notifications",
+    UNREAD: "/notifications/unread",
+    READ_ALL: "/notifications/read-all",
+  },
+};

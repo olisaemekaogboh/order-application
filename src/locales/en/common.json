@@ -1,0 +1,19 @@
+{
+  "app_name": "Logistics Transport",
+  "welcome": "Welcome",
+  "dashboard": "Dashboard",
+  "orders": "Orders",
+  "drivers": "Drivers",
+  "revenue": "Revenue",
+  "profile": "Profile",
+  "logout": "Logout",
+  "login": "Login",
+  "register": "Register",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success"
+}

@@ -1,0 +1,12 @@
+{
+  "network_error": "Àṣìṣe nẹ́tíwọ̀kì. Jọ̀wọ́ ṣàyẹ̀wò ìsopọ̀ rẹ.",
+  "server_error": "Àṣìṣe olú. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i.",
+  "unauthorized": "Wíwọlé láìlórúkọ. Jọ̀wọ́ tún wọlé.",
+  "not_found": "A kò rí ohun tó ń wá.",
+  "validation_error": "Àṣìṣe ìfọ̀rọ̀wérọ́. Jọ̀wọ́ ṣàyẹ̀wò àwọn tí o tẹ̀.",
+  "generic_error": "Àṣìṣe kan ṣẹlẹ̀. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i.",
+  "required": "A nílò èyí",
+  "invalid_email": "Imeeli tí kò tọ́",
+  "invalid_phone": "Nọ́mbà fóònù tí kò tọ́",
+  "password_mismatch": "Ọ̀rọ̀ ìgbàwọlé kò bára mu"
+}

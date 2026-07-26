@@ -1,0 +1,17 @@
+{
+  "create_order": "Create Order",
+  "order_history": "Order History",
+  "order_details": "Order Details",
+  "order_number": "Order Number",
+  "pickup_location": "Pickup Location",
+  "delivery_location": "Delivery Location",
+  "distance": "Distance",
+  "weight": "Weight",
+  "volume": "Volume",
+  "vehicle_type": "Vehicle Type",
+  "express_delivery": "Express Delivery",
+  "total_price": "Total Price",
+  "status": "Status",
+  "track_order": "Track Order",
+  "cancel_order": "Cancel Order"
+}
