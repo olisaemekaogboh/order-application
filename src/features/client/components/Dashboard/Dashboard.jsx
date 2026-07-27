@@ -1,100 +1,193 @@
-import React, { useState, useEffect } from 'react'
-import { useClient } from '../../hooks/useClient'
-import { useAuth } from '../../../auth/hooks/useAuth'
-import { useOrders } from '../../../orders/hooks/useOrders'
-import StatsCards from '@/shared/components/dashboard/widgets/StatsCards/StatsCards'
-import RecentOrders from '@/shared/components/dashboard/widgets/RecentOrders/RecentOrders'
-import QuickActions from '@/shared/components/dashboard/widgets/QuickActions/QuickActions'
-import Spinner from '@/shared/components/ui/Spinner/Spinner'
+import { useMemo } from 'react'
+import { format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
+
+import { useAuth } from '../../../auth/hooks/useAuth'
+import useDashboard from './hooks/useDashboard'
+
+import DashboardSkeleton from './DashboardSkeleton'
+
+import StatCard from './components/StatCard'
+import OrderTrendChart from './components/OrderTrendChart'
+import DeliveryStatusChart from './components/DeliveryStatusChart'
+import SpendingChart from './components/SpendingChart'
+import RecentOrdersTable from './components/RecentOrdersTable'
+import QuickActions from './components/QuickActions'
+
 import { CLIENT_ROUTES } from '../../constants'
 
-const ClientDashboard = () => {
-  const { user } = useAuth()
+export default function Dashboard() {
   const navigate = useNavigate()
-  const { getProfile, profile, loading } = useClient()
-  const { recentOrders, getRecentOrders, loading: ordersLoading } = useOrders()
 
-  useEffect(() => {
-    getProfile()
-    getRecentOrders(5)
-  }, [])
+  const { user } = useAuth()
 
-  const quickActions = [
+  const { loading, profile, orders, stats, monthlyOrders, monthlySpending, deliveryStatus } =
+    useDashboard()
+
+  const today = format(new Date(), 'EEEE, MMMM dd, yyyy')
+
+  const statCards = useMemo(
+    () => [
+      {
+        title: 'Total Orders',
+        value: stats.totalOrders,
+        subtitle: 'All shipments',
+        color: 'blue',
+      },
+      {
+        title: 'Active Orders',
+        value: stats.activeOrders,
+        subtitle: 'Currently processing',
+        color: 'amber',
+      },
+      {
+        title: 'Delivered',
+        value: stats.deliveredOrders,
+        subtitle: 'Completed deliveries',
+        color: 'green',
+      },
+      {
+        title: 'Total Spent',
+        value: stats.totalSpent,
+        subtitle: 'Lifetime spending',
+        color: 'purple',
+      },
+      {
+        title: 'Addresses',
+        value: stats.savedAddresses,
+        subtitle: 'Saved locations',
+        color: 'slate',
+      },
+      {
+        title: 'Cancelled',
+        value: stats.cancelledOrders,
+        subtitle: 'Cancelled orders',
+        color: 'red',
+      },
+    ],
+    [stats]
+  )
+
+  const actions = [
     {
-      id: 'create-order',
+      id: 'create',
       label: 'Create Order',
-      icon: '📦',
+      description: 'Create a new shipment request.',
       onClick: () => navigate(CLIENT_ROUTES.CREATE_ORDER),
-      color: 'bg-blue-500',
     },
     {
-      id: 'track-orders',
-      label: 'Track Orders',
-      icon: '📍',
+      id: 'orders',
+      label: 'My Orders',
+      description: 'Track and manage your shipments.',
       onClick: () => navigate(CLIENT_ROUTES.ORDERS),
-      color: 'bg-green-500',
     },
     {
-      id: 'manage-addresses',
-      label: 'Manage Addresses',
-      icon: '🏠',
+      id: 'addresses',
+      label: 'Addresses',
+      description: 'Manage pickup and delivery addresses.',
       onClick: () => navigate(CLIENT_ROUTES.ADDRESSES),
-      color: 'bg-purple-500',
     },
     {
-      id: 'view-profile',
-      label: 'View Profile',
-      icon: '👤',
+      id: 'profile',
+      label: 'Profile',
+      description: 'Update your personal information.',
       onClick: () => navigate(CLIENT_ROUTES.PROFILE),
-      color: 'bg-yellow-500',
     },
   ]
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    )
-  }
-
-  const stats = {
-    totalOrders: 25,
-    activeOrders: 3,
-    deliveredOrders: 20,
-    totalSpent: 45000,
+    return <DashboardSkeleton />
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Welcome back, {user?.firstName || 'User'}! 👋
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Here's an overview of your logistics activities
-        </p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+            Welcome back, {profile?.firstName || user?.firstName || 'Client'}
+          </h1>
+
+          <p className="mt-2 text-slate-500">Here's what's happening with your logistics today.</p>
+        </div>
+
+        <div className="mt-4 lg:mt-0 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-4 shadow-sm">
+          <p className="text-xs uppercase tracking-wide text-slate-500">Today</p>
+
+          <p className="font-semibold text-slate-900 dark:text-white">{today}</p>
+        </div>
       </div>
-
-      <StatsCards stats={stats} />
-
-      <div className="mt-8">
-        <QuickActions actions={quickActions} />
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {statCards.map((card) => (
+          <StatCard key={card.title} {...card} />
+        ))}
       </div>
+      {/* Charts */}
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <OrderTrendChart
+            data={monthlyOrders}
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Orders</h2>
-        {ordersLoading ? (
-          <div className="flex justify-center py-4">
-            <Spinner size="sm" />
-          </div>
-        ) : (
-          <RecentOrders orders={recentOrders || []} />
-        )}
+            loading={loading}
+          />
+        </div>
+
+        <DeliveryStatusChart
+          data={deliveryStatus}
+
+          loading={loading}
+        />
+      </div>{' '}
+      {/* Spending */}
+      <SpendingChart data={monthlySpending} loading={loading} />
+      {/* Recent Orders */}
+      <RecentOrdersTable orders={orders.slice(0, 5)} loading={loading} />
+      {/* Quick Actions */}
+      <QuickActions actions={actions} />
+      {/* Summary */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Total Spending</h3>
+
+          <p className="mt-6 text-4xl font-bold text-blue-600">
+            {new Intl.NumberFormat('en-NG', {
+              style: 'currency',
+              currency: 'NGN',
+              maximumFractionDigits: 0,
+            }).format(stats.totalSpent)}
+          </p>
+
+          <p className="mt-3 text-sm text-slate-500">
+            Total amount spent across all completed and active shipments.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Success Rate</h3>
+
+          <p className="mt-6 text-4xl font-bold text-emerald-600">
+            {stats.totalOrders > 0
+              ? Math.round((stats.deliveredOrders / stats.totalOrders) * 100)
+              : 0}
+            %
+          </p>
+
+          <p className="mt-3 text-sm text-slate-500">
+            Percentage of orders successfully delivered.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Saved Addresses</h3>
+
+          <p className="mt-6 text-4xl font-bold text-violet-600">{stats.savedAddresses}</p>
+
+          <p className="mt-3 text-sm text-slate-500">
+            Pickup and delivery addresses available for future orders.
+          </p>
+        </div>
       </div>
     </div>
   )
 }
-
-export default ClientDashboard
