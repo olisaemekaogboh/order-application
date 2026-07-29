@@ -1,17 +1,26 @@
-import React, { useState } from 'react'
-import { orderService } from '../../services/orderService'
+import React, { useState, useEffect } from 'react'
+import { pricingService } from '@/shared/services/pricingService'
+import { VEHICLE_TYPES_LABELS, VEHICLE_TYPES } from '../../constants'
 import toast from 'react-hot-toast'
 
-const PriceCalculator = () => {
+const PriceCalculator = ({ initialDistance, initialVehicle, vehicleOptions = [] }) => {
   const [form, setForm] = useState({
-    distanceKm: '',
+    distanceKm: initialDistance || '',
     weight: '',
     volume: '',
-    vehicleType: 'STANDARD',
+    vehicleType: initialVehicle || VEHICLE_TYPES.SEDAN,
     expressDelivery: false,
   })
   const [price, setPrice] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      distanceKm: initialDistance || prev.distanceKm,
+      vehicleType: initialVehicle || prev.vehicleType,
+    }))
+  }, [initialDistance, initialVehicle])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -28,16 +37,26 @@ const PriceCalculator = () => {
     }
     setLoading(true)
     try {
-      const data = await orderService.calculatePrice({
-        ...form,
+      const data = {
         distanceKm: parseFloat(form.distanceKm),
         weight: parseFloat(form.weight) || 0,
         volume: parseFloat(form.volume) || 0,
+        vehicleType: form.vehicleType,
         expressDelivery: form.expressDelivery,
-      })
-      setPrice(data)
+      }
+      const result = await pricingService.calculatePrice(data)
+      setPrice(result)
+      toast.success('Price calculated')
     } catch (error) {
-      toast.error('Failed to calculate price')
+      console.error('Price calculation error:', error)
+      let msg = 'Failed to calculate price'
+      if (error.response?.status === 404) {
+        msg = 'No active pricing configuration found for this vehicle. Please contact admin.'
+      } else if (error.response?.data?.message) {
+        msg = error.response.data.message
+      }
+      toast.error(msg)
+      setPrice(null)
     } finally {
       setLoading(false)
     }
@@ -95,10 +114,17 @@ const PriceCalculator = () => {
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
           >
-            <option value="MOTORCYCLE">Motorcycle</option>
-            <option value="MINI_VAN">Mini Van</option>
-            <option value="STANDARD">Standard</option>
-            <option value="TRUCK">Truck</option>
+            {vehicleOptions.length > 0
+              ? vehicleOptions.map((opt) => (
+                  <option key={opt.vehicleType} value={opt.vehicleType}>
+                    {VEHICLE_TYPES_LABELS[opt.vehicleType] || opt.vehicleType}
+                  </option>
+                ))
+              : Object.entries(VEHICLE_TYPES_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
           </select>
         </div>
         <div className="flex items-center">

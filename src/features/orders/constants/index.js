@@ -11,7 +11,7 @@ export const ORDER_STATUSES = {
   IN_TRANSIT: 'IN_TRANSIT',
   DELIVERED: 'DELIVERED',
   CANCELLED: 'CANCELLED',
-};
+}
 
 export const ORDER_STATUSES_LABELS = {
   [ORDER_STATUSES.PENDING]: 'Pending',
@@ -20,7 +20,7 @@ export const ORDER_STATUSES_LABELS = {
   [ORDER_STATUSES.IN_TRANSIT]: 'In Transit',
   [ORDER_STATUSES.DELIVERED]: 'Delivered',
   [ORDER_STATUSES.CANCELLED]: 'Cancelled',
-};
+}
 
 export const ORDER_STATUSES_COLORS = {
   [ORDER_STATUSES.PENDING]: 'bg-yellow-100 text-yellow-800',
@@ -29,7 +29,7 @@ export const ORDER_STATUSES_COLORS = {
   [ORDER_STATUSES.IN_TRANSIT]: 'bg-indigo-100 text-indigo-800',
   [ORDER_STATUSES.DELIVERED]: 'bg-green-100 text-green-800',
   [ORDER_STATUSES.CANCELLED]: 'bg-red-100 text-red-800',
-};
+}
 
 // ===== Payment Statuses =====
 export const PAYMENT_STATUSES = {
@@ -38,7 +38,7 @@ export const PAYMENT_STATUSES = {
   FAILED: 'FAILED',
   REFUNDED: 'REFUNDED',
   CANCELLED: 'CANCELLED',
-};
+}
 
 export const PAYMENT_STATUSES_LABELS = {
   [PAYMENT_STATUSES.PENDING]: 'Pending',
@@ -46,22 +46,36 @@ export const PAYMENT_STATUSES_LABELS = {
   [PAYMENT_STATUSES.FAILED]: 'Failed',
   [PAYMENT_STATUSES.REFUNDED]: 'Refunded',
   [PAYMENT_STATUSES.CANCELLED]: 'Cancelled',
-};
+}
 
-// ===== Vehicle Types =====
+// ===== Vehicle Types (aligned with backend enum) =====
 export const VEHICLE_TYPES = {
   MOTORCYCLE: 'MOTORCYCLE',
-  MINI_VAN: 'MINI_VAN',
-  STANDARD: 'STANDARD',
+  VAN: 'VAN',
+  SUV: 'SUV',
+  MINI_TRUCK: 'MINI_TRUCK',
+  TRICYCLE: 'TRICYCLE',
+  REFRIGERATED_TRUCK: 'REFRIGERATED_TRUCK',
   TRUCK: 'TRUCK',
-};
+  TRAILER: 'TRAILER',
+  TANKER: 'TANKER',
+  PICKUP: 'PICKUP',
+  SEDAN: 'SEDAN',
+}
 
 export const VEHICLE_TYPES_LABELS = {
   [VEHICLE_TYPES.MOTORCYCLE]: 'Motorcycle',
-  [VEHICLE_TYPES.MINI_VAN]: 'Mini Van',
-  [VEHICLE_TYPES.STANDARD]: 'Standard',
+  [VEHICLE_TYPES.VAN]: 'Van',
+  [VEHICLE_TYPES.SUV]: 'SUV',
+  [VEHICLE_TYPES.MINI_TRUCK]: 'Mini Truck',
+  [VEHICLE_TYPES.TRICYCLE]: 'Tricycle',
+  [VEHICLE_TYPES.REFRIGERATED_TRUCK]: 'Refrigerated Truck',
   [VEHICLE_TYPES.TRUCK]: 'Truck',
-};
+  [VEHICLE_TYPES.TRAILER]: 'Trailer',
+  [VEHICLE_TYPES.TANKER]: 'Tanker',
+  [VEHICLE_TYPES.PICKUP]: 'Pickup',
+  [VEHICLE_TYPES.SEDAN]: 'Sedan',
+}
 
 // ===== Order Constants =====
 export const ORDER_CONSTANTS = {
@@ -73,7 +87,7 @@ export const ORDER_CONSTANTS = {
   MAX_VOLUME: 100, // m³
   EXPRESS_SURCHARGE: 0.25, // 25% extra
   COMMISSION_RATE: 0.05, // 5%
-};
+}
 
 // ===== Order Error Messages =====
 export const ORDER_ERRORS = {
@@ -97,7 +111,7 @@ export const ORDER_ERRORS = {
   UPDATE_FAILED: 'Failed to update order',
   CANCELLATION_FAILED: 'Failed to cancel order',
   ASSIGNMENT_FAILED: 'Failed to assign driver',
-};
+}
 
 // ===== Order Success Messages =====
 export const ORDER_SUCCESS = {
@@ -108,7 +122,7 @@ export const ORDER_SUCCESS = {
   DRIVER_ASSIGNED: 'Driver assigned successfully',
   PRICE_CALCULATED: 'Price calculated successfully',
   DELETED: 'Order deleted successfully',
-};
+}
 
 // ===== Order API Endpoints =====
 export const ORDER_API = {
@@ -123,10 +137,10 @@ export const ORDER_API = {
   ASSIGN_DRIVER: '/orders/{id}/assign-driver',
   CALCULATE_PRICE: '/orders/calculate-price',
   TRACK: '/orders/{id}/track',
-  GET_RECENT: '/orders/my-orders/recent',
-  COUNT: '/orders/my-orders/count',
-  ACTIVE_COUNT: '/orders/my-orders/active-count',
-};
+  GET_RECENT: '/orders/recent',
+  COUNT: '/orders/count',
+  ACTIVE_COUNT: '/orders/count-active',
+}
 
 // ===== Order Routes =====
 export const ORDER_ROUTES = {
@@ -135,7 +149,7 @@ export const ORDER_ROUTES = {
   HISTORY: '/client/order-history',
   MANAGE: '/admin/orders',
   DETAILS: '/admin/orders/:id',
-};
+}
 
 // ===== Order Filter Defaults =====
 export const ORDER_FILTER_DEFAULTS = {
@@ -143,4 +157,4 @@ export const ORDER_FILTER_DEFAULTS = {
   SIZE: 20,
   SORT_BY: 'createdAt',
   SORT_DIRECTION: 'DESC',
-};
+}

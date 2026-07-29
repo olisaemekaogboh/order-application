@@ -48,7 +48,7 @@ export const orderService = {
     return response.data.data
   },
 
-  // --- FIXED ENDPOINTS ---
+  // FIXED ENDPOINTS
   getOrderCount: async () => {
     const response = await axiosInstance.get('/orders/count')
     return response.data.data
@@ -64,13 +64,11 @@ export const orderService = {
     return response.data.data
   },
 
-  // --- NEW ---
   getOrderByNumber: async (orderNumber) => {
     const response = await axiosInstance.get(`/orders/number/${orderNumber}`)
     return response.data.data
   },
 
-  // --- OPTIONAL ---
   updatePaymentStatus: async (orderId, paymentStatus) => {
     const response = await axiosInstance.put(`/orders/${orderId}/payment`, { paymentStatus })
     return response.data.data

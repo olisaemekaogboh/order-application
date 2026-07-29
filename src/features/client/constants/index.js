@@ -1,7 +1,3 @@
-/**
- * Client Constants
- */
-
 export const CLIENT_ROUTES = {
   DASHBOARD: '/client/dashboard',
   PROFILE: '/client/profile',
@@ -11,6 +7,7 @@ export const CLIENT_ROUTES = {
   CREATE_ORDER: '/client/create-order',
   ORDER_TRACKING: '/client/order-tracking/:id',
   REVIEWS: '/client/reviews',
+  NOTIFICATIONS: '/client/notifications', // added
 }
 
 export const CLIENT_DEFAULTS = {

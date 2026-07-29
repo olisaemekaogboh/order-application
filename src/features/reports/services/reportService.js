@@ -1,118 +1,124 @@
-/**
- * Report Service
- * Handles all report-related API calls
- */
-
 import axiosInstance from '@/shared/utils/helpers/axiosConfig'
-import { REPORT_API } from '../constants'
-
-/**
- * Get paginated reports
- * @param {Object} params - Query parameters (page, size, type, etc.)
- * @returns {Promise} Paginated report list
- */
-export const getReports = async (params = {}) => {
-  const response = await axiosInstance.get(REPORT_API.GET_ALL, { params })
-  return response.data.data
-}
-
-/**
- * Generate a new report
- * @param {Object} data - Report generation data
- * @param {string} data.type - Report type
- * @param {string} data.period - Report period
- * @param {string} data.startDate - Start date (if custom period)
- * @param {string} data.endDate - End date (if custom period)
- * @param {string} data.format - Export format
- * @param {Object} data.filters - Additional filters
- * @returns {Promise} Generated report
- */
-export const generateReport = async (data) => {
-  const response = await axiosInstance.post(REPORT_API.GENERATE, data)
-  return response.data.data
-}
-
-/**
- * Get report by ID
- * @param {string} id - Report ID
- * @returns {Promise} Report data
- */
-export const getReportById = async (id) => {
-  const response = await axiosInstance.get(REPORT_API.GET_BY_ID.replace('{id}', id))
-  return response.data.data
-}
-
-/**
- * Download a report
- * @param {string} id - Report ID
- * @param {string} format - Export format (pdf, excel, csv, json)
- * @returns {Promise} Blob
- */
-export const downloadReport = async (id, format = 'pdf') => {
-  const response = await axiosInstance.get(REPORT_API.DOWNLOAD.replace('{id}', id), {
-    params: { format },
-    responseType: 'blob',
-  })
-  return response.data
-}
-
-/**
- * Delete a report
- * @param {string} id - Report ID
- * @returns {Promise} Success response
- */
-export const deleteReport = async (id) => {
-  const response = await axiosInstance.delete(REPORT_API.DELETE.replace('{id}', id))
-  return response.data
-}
-
-/**
- * Export report directly without saving
- * @param {Object} filters - Report filters
- * @param {string} format - Export format
- * @returns {Promise} Blob
- */
-export const exportReport = async (filters, format = 'pdf') => {
-  const response = await axiosInstance.post(REPORT_API.EXPORT, filters, {
-    params: { format },
-    responseType: 'blob',
-  })
-  return response.data
-}
-
-/**
- * Schedule a report for automatic generation
- * @param {Object} data - Schedule data
- * @param {string} data.type - Report type
- * @param {string} data.frequency - Schedule frequency (daily, weekly, monthly)
- * @param {string} data.recipients - Email recipients
- * @param {string} data.format - Export format
- * @returns {Promise} Schedule data
- */
-export const scheduleReport = async (data) => {
-  const response = await axiosInstance.post(REPORT_API.SCHEDULE, data)
-  return response.data.data
-}
-
-/**
- * Cancel a scheduled report
- * @param {string} id - Schedule ID
- * @returns {Promise} Success response
- */
-export const cancelSchedule = async (id) => {
-  const response = await axiosInstance.delete(REPORT_API.CANCEL_SCHEDULE.replace('{id}', id))
-  return response.data
-}
 
 export const reportService = {
-  getReports,
-  generateReport,
-  getReportById,
-  downloadReport,
-  exportReport,
-  deleteReport,
-  scheduleReport,
-  cancelSchedule,
-}
+  // Revenue Report - POST
+  generateRevenueReport: async (data) => {
+    const response = await axiosInstance.post('/reports/revenue', data)
+    return response.data.data
+  },
 
-export default reportService
+  // Order Report - POST
+  generateOrderReport: async (data) => {
+    const response = await axiosInstance.post('/reports/orders', data)
+    return response.data.data
+  },
+
+  // Driver Report - POST
+  generateDriverReport: async (data) => {
+    const response = await axiosInstance.post('/reports/drivers', data)
+    return response.data.data
+  },
+
+  // Customer Report - POST
+  generateCustomerReport: async (data) => {
+    const response = await axiosInstance.post('/reports/customers', data)
+    return response.data.data
+  },
+
+  // Delivery Performance Report - POST
+  generateDeliveryReport: async (data) => {
+    const response = await axiosInstance.post('/reports/delivery', data)
+    return response.data.data
+  },
+
+  // Dashboard Analytics - GET (this one is GET in backend)
+  getDashboardAnalytics: async () => {
+    const response = await axiosInstance.get('/reports/dashboard')
+    return response.data.data
+  },
+
+  // Download endpoints (POST)
+  downloadRevenuePdf: async (data) => {
+    const response = await axiosInstance.post('/reports/revenue/pdf', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadRevenueExcel: async (data) => {
+    const response = await axiosInstance.post('/reports/revenue/excel', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadRevenueCsv: async (data) => {
+    const response = await axiosInstance.post('/reports/revenue/csv', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadOrdersPdf: async (data) => {
+    const response = await axiosInstance.post('/reports/orders/pdf', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadOrdersExcel: async (data) => {
+    const response = await axiosInstance.post('/reports/orders/excel', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadOrdersCsv: async (data) => {
+    const response = await axiosInstance.post('/reports/orders/csv', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadDriversPdf: async (data) => {
+    const response = await axiosInstance.post('/reports/drivers/pdf', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadDriversExcel: async (data) => {
+    const response = await axiosInstance.post('/reports/drivers/excel', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadDriversCsv: async (data) => {
+    const response = await axiosInstance.post('/reports/drivers/csv', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadCustomersPdf: async (data) => {
+    const response = await axiosInstance.post('/reports/customers/pdf', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadCustomersExcel: async (data) => {
+    const response = await axiosInstance.post('/reports/customers/excel', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  downloadCustomersCsv: async (data) => {
+    const response = await axiosInstance.post('/reports/customers/csv', data, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
+}

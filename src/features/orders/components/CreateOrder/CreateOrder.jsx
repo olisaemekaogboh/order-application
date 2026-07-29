@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOrders } from '../../hooks/useOrders'
-import OrderForm from '../../../orders/components/OrderForm/OrderForm'
-import PriceCalculator from '../../../orders/components/PriceCalculator/PriceCalculator'
-import Button from '@/shared/components/ui/Button/Button'
+import OrderForm from '../OrderForm/OrderForm'
+import PriceCalculator from '../PriceCalculator/PriceCalculator'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/Card/Card'
 import toast from 'react-hot-toast'
 import { distanceService } from '@/shared/services/distanceService'
 import { pricingService } from '@/shared/services/pricingService'
-import { VEHICLE_TYPES_LABELS } from '../../../orders/constants'
+import { VEHICLE_TYPES } from '../../constants'
 
 const CreateOrder = () => {
   const navigate = useNavigate()
@@ -17,7 +16,7 @@ const CreateOrder = () => {
   const [distance, setDistance] = useState(null)
   const [isDistanceLoading, setIsDistanceLoading] = useState(false)
   const [vehicleOptions, setVehicleOptions] = useState([])
-  const [selectedVehicle, setSelectedVehicle] = useState('')
+  const [selectedVehicle, setSelectedVehicle] = useState(VEHICLE_TYPES.SEDAN)
   const [priceBreakdown, setPriceBreakdown] = useState(null)
 
   // Fetch active pricing on mount
@@ -25,13 +24,27 @@ const CreateOrder = () => {
     const fetchPricing = async () => {
       try {
         const configs = await pricingService.getActivePricing()
-        // configs is array of { vehicleType, basePrice, ... }
-        setVehicleOptions(configs)
-        if (configs.length > 0) {
+        if (configs && configs.length > 0) {
+          setVehicleOptions(configs)
           setSelectedVehicle(configs[0].vehicleType)
+        } else {
+          // Fallback to all enum values
+          setVehicleOptions(
+            Object.keys(VEHICLE_TYPES).map((key) => ({
+              vehicleType: VEHICLE_TYPES[key],
+            }))
+          )
+          setSelectedVehicle(VEHICLE_TYPES.SEDAN)
         }
       } catch (err) {
         console.error('Failed to load pricing', err)
+        // Fallback to all enum values
+        setVehicleOptions(
+          Object.keys(VEHICLE_TYPES).map((key) => ({
+            vehicleType: VEHICLE_TYPES[key],
+          }))
+        )
+        setSelectedVehicle(VEHICLE_TYPES.SEDAN)
       }
     }
     fetchPricing()
@@ -55,43 +68,60 @@ const CreateOrder = () => {
       setIsDistanceLoading(true)
       distanceService
         .calculateDistance(pickup, delivery)
-        .then((dist) => {
-          setDistance(dist)
-          // Optionally auto-update the form's distance field
-        })
+        .then((dist) => setDistance(dist))
         .catch(() => toast.error('Failed to calculate distance'))
         .finally(() => setIsDistanceLoading(false))
     }
   }
 
-  // When distance or vehicle changes, recalc price
+  // Recalculate price when distance or vehicle changes
   useEffect(() => {
     if (distance && selectedVehicle) {
       pricingService
         .calculatePrice({
           distanceKm: distance,
           vehicleType: selectedVehicle,
-          // weight, volume, expressDelivery from form state
         })
         .then((price) => setPriceBreakdown(price))
-        .catch(() => toast.error('Price calculation failed'))
+        .catch((err) => {
+          console.warn('Price calculation failed:', err)
+          setPriceBreakdown(null)
+          // Show a gentle warning but don't block user
+          if (err.response?.status === 404) {
+            toast.error('No pricing configuration found for this vehicle. Please contact admin.')
+          }
+        })
     }
   }, [distance, selectedVehicle])
 
   const handleSubmit = async (data) => {
     try {
-      const order = await createOrder({
-        ...data,
+      const pickupDate = data.pickupDate
+        ? new Date(data.pickupDate).toISOString()
+        : new Date().toISOString()
+
+      const orderData = {
+        pickupLocation: data.pickupLocation,
+        deliveryLocation: data.deliveryLocation,
         distanceKm: distance || parseFloat(data.distanceKm) || 0,
         weight: parseFloat(data.weight) || 0,
         volume: parseFloat(data.volume) || 0,
-        expressDelivery: data.expressDelivery === 'true',
-        pickupDate: new Date(data.pickupDate).toISOString(),
-        vehicleType: selectedVehicle,
-      })
-      navigate(`/client/order-tracking/${order.id}`)
+        vehicleType: data.vehicleType || selectedVehicle,
+        pickupDate,
+        expressDelivery: data.expressDelivery === true || data.expressDelivery === 'true',
+      }
+
+      const order = await createOrder(orderData)
+      if (order && order.id) {
+        navigate(`/client/order-tracking/${order.id}`)
+      } else {
+        // This should not happen if createOrder throws on error
+        toast.error('Order created but no ID returned')
+      }
     } catch (error) {
-      // error handled in hook
+      console.error('Order creation failed:', error)
+      const msg = error.response?.data?.message || 'Failed to create order'
+      toast.error(msg)
     }
   }
 
@@ -103,10 +133,6 @@ const CreateOrder = () => {
           <OrderForm
             onSubmit={handleSubmit}
             loading={loading}
-            onAddressChange={handleAddressChange}
-            onAddressBlur={handleAddressBlur}
-            distance={distance}
-            isDistanceLoading={isDistanceLoading}
             vehicleOptions={vehicleOptions}
             selectedVehicle={selectedVehicle}
             onVehicleChange={setSelectedVehicle}
@@ -117,6 +143,7 @@ const CreateOrder = () => {
             onPriceCalculated={setCalculatedPrice}
             initialDistance={distance}
             initialVehicle={selectedVehicle}
+            vehicleOptions={vehicleOptions}
           />
           {priceBreakdown && (
             <Card className="mt-4">

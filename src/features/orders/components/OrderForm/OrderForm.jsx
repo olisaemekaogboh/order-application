@@ -1,14 +1,49 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { VEHICLE_TYPES, VEHICLE_TYPES_LABELS } from '../../constants'
 
-const OrderForm = ({ onSubmit, loading, initialData = {} }) => {
+const OrderForm = ({
+  onSubmit,
+  loading,
+  initialData = {},
+  vehicleOptions = [],
+  selectedVehicle = '',
+  onVehicleChange,
+}) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm({
-    defaultValues: initialData,
+    defaultValues: {
+      pickupLocation: initialData.pickupLocation || '',
+      deliveryLocation: initialData.deliveryLocation || '',
+      distanceKm: initialData.distanceKm || '',
+      weight: initialData.weight || '',
+      volume: initialData.volume || '',
+      vehicleType: selectedVehicle || initialData.vehicleType || VEHICLE_TYPES.SEDAN,
+      pickupDate: initialData.pickupDate || '',
+      expressDelivery: initialData.expressDelivery || false,
+    },
   })
+
+  const vehicleType = watch('vehicleType')
+
+  // Notify parent when vehicle changes
+  useEffect(() => {
+    if (onVehicleChange && vehicleType) {
+      onVehicleChange(vehicleType)
+    }
+  }, [vehicleType, onVehicleChange])
+
+  // When selectedVehicle from parent changes (e.g., default), update form
+  useEffect(() => {
+    if (selectedVehicle) {
+      setValue('vehicleType', selectedVehicle)
+    }
+  }, [selectedVehicle, setValue])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -24,6 +59,7 @@ const OrderForm = ({ onSubmit, loading, initialData = {} }) => {
           <p className="text-red-500 text-xs mt-1">{errors.pickupLocation.message}</p>
         )}
       </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Delivery Location
@@ -36,6 +72,7 @@ const OrderForm = ({ onSubmit, loading, initialData = {} }) => {
           <p className="text-red-500 text-xs mt-1">{errors.deliveryLocation.message}</p>
         )}
       </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -47,6 +84,9 @@ const OrderForm = ({ onSubmit, loading, initialData = {} }) => {
             {...register('distanceKm', { required: 'Distance is required', min: 1 })}
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
           />
+          {errors.distanceKm && (
+            <p className="text-red-500 text-xs mt-1">{errors.distanceKm.message}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -60,6 +100,71 @@ const OrderForm = ({ onSubmit, loading, initialData = {} }) => {
           />
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Volume (m³)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            {...register('volume')}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Vehicle Type
+          </label>
+          <select
+            {...register('vehicleType', { required: 'Vehicle type is required' })}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          >
+            {vehicleOptions.length > 0
+              ? vehicleOptions.map((opt) => (
+                  <option key={opt.vehicleType} value={opt.vehicleType}>
+                    {VEHICLE_TYPES_LABELS[opt.vehicleType] || opt.vehicleType}
+                  </option>
+                ))
+              : // Fallback to all allowed enum values
+                Object.entries(VEHICLE_TYPES_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+          </select>
+          {errors.vehicleType && (
+            <p className="text-red-500 text-xs mt-1">{errors.vehicleType.message}</p>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Pickup Date & Time
+        </label>
+        <input
+          type="datetime-local"
+          {...register('pickupDate', { required: 'Pickup date is required' })}
+          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+        />
+        {errors.pickupDate && (
+          <p className="text-red-500 text-xs mt-1">{errors.pickupDate.message}</p>
+        )}
+      </div>
+
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          {...register('expressDelivery')}
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+          Express Delivery
+        </label>
+      </div>
+
       <button
         type="submit"
         disabled={loading}

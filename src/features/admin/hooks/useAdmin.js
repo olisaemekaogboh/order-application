@@ -10,7 +10,9 @@ export const useAdmin = () => {
   const [users, setUsers] = useState([])
   const [drivers, setDrivers] = useState([])
   const [pricingConfigs, setPricingConfigs] = useState([])
+  const [systemConfigs, setSystemConfigs] = useState([])
   const [auditLogs, setAuditLogs] = useState([])
+  const [trackingSessions, setTrackingSessions] = useState([])
   const [pagination, setPagination] = useState({
     page: 0,
     size: 20,
@@ -114,33 +116,14 @@ export const useAdmin = () => {
     [pagination.page, pagination.size]
   )
 
-  const enableUser = useCallback(async (userId) => {
+  const updateUserStatus = useCallback(async (userId, enabled) => {
     setLoading(true)
     try {
-      await adminService.enableUser(userId)
-      setUsers((prev) =>
-        prev.map((user) => (user.id === userId ? { ...user, enabled: true } : user))
-      )
-      toast.success('User enabled successfully')
+      await adminService.updateUserStatus(userId, { enabled })
+      setUsers((prev) => prev.map((user) => (user.id === userId ? { ...user, enabled } : user)))
+      toast.success(`User ${enabled ? 'enabled' : 'disabled'} successfully`)
     } catch (err) {
-      const message = err.response?.data?.message || 'Failed to enable user'
-      toast.error(message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  const disableUser = useCallback(async (userId) => {
-    setLoading(true)
-    try {
-      await adminService.disableUser(userId)
-      setUsers((prev) =>
-        prev.map((user) => (user.id === userId ? { ...user, enabled: false } : user))
-      )
-      toast.success('User disabled successfully')
-    } catch (err) {
-      const message = err.response?.data?.message || 'Failed to disable user'
+      const message = err.response?.data?.message || 'Failed to update user status'
       toast.error(message)
       throw err
     } finally {
@@ -193,23 +176,6 @@ export const useAdmin = () => {
     },
     [pagination.page, pagination.size]
   )
-
-  const updateDriverAvailability = useCallback(async (driverId, available) => {
-    setLoading(true)
-    try {
-      await driverService.updateAvailability(driverId, available)
-      setDrivers((prev) =>
-        prev.map((driver) => (driver.id === driverId ? { ...driver, available } : driver))
-      )
-      toast.success('Driver availability updated')
-    } catch (err) {
-      const message = err.response?.data?.message || 'Failed to update driver availability'
-      toast.error(message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [])
 
   // ===== Pricing Configuration =====
   const fetchPricingConfigs = useCallback(async () => {
@@ -312,6 +278,86 @@ export const useAdmin = () => {
     }
   }, [])
 
+  // ===== System Configuration (NEW) =====
+  const fetchSystemConfigs = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await adminService.getSystemConfigs()
+      setSystemConfigs(data || [])
+      return data
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to fetch system configs'
+      setError(message)
+      toast.error(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const updateSystemConfig = useCallback(async (key, data) => {
+    setLoading(true)
+    try {
+      const result = await adminService.updateSystemConfig(key, data)
+      setSystemConfigs((prev) => prev.map((config) => (config.key === key ? result : config)))
+      toast.success('System configuration updated')
+      return result
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to update system config'
+      toast.error(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // ===== Admin Tracking (NEW) =====
+  const fetchAllTracking = useCallback(
+    async (params = {}) => {
+      setLoading(true)
+      setError(null)
+      try {
+        const response = await adminService.getAllTracking({
+          page: pagination.page,
+          size: pagination.size,
+          ...params,
+        })
+        setTrackingSessions(response.content || [])
+        setPagination({
+          page: response.page || 0,
+          size: response.size || 20,
+          total: response.total || 0,
+          totalPages: response.totalPages || 0,
+        })
+        return response
+      } catch (err) {
+        const message = err.response?.data?.message || 'Failed to fetch tracking sessions'
+        setError(message)
+        toast.error(message)
+        throw err
+      } finally {
+        setLoading(false)
+      }
+    },
+    [pagination.page, pagination.size]
+  )
+
+  // ===== Driver Payment (NEW) =====
+  const processDriverPayment = useCallback(async (driverId, amount) => {
+    setLoading(true)
+    try {
+      await adminService.processDriverPayment(driverId, amount)
+      toast.success(`Payment of ₦${amount} processed for driver`)
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to process driver payment'
+      toast.error(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   // ===== Audit Logs =====
   const fetchAuditLogs = useCallback(
     async (params = {}) => {
@@ -343,7 +389,7 @@ export const useAdmin = () => {
     [pagination.page, pagination.size]
   )
 
-  // ===== Change Page =====
+  // ===== Pagination =====
   const changePage = useCallback((page) => {
     setPagination((prev) => ({ ...prev, page }))
   }, [])
@@ -358,7 +404,9 @@ export const useAdmin = () => {
     setUsers([])
     setDrivers([])
     setPricingConfigs([])
+    setSystemConfigs([])
     setAuditLogs([])
+    setTrackingSessions([])
     setPagination({
       page: 0,
       size: 20,
@@ -376,7 +424,9 @@ export const useAdmin = () => {
     users,
     drivers,
     pricingConfigs,
+    systemConfigs,
     auditLogs,
+    trackingSessions,
     pagination,
 
     // Dashboard
@@ -386,13 +436,11 @@ export const useAdmin = () => {
     // Users
     fetchUsers,
     fetchUsersByRole,
-    enableUser,
-    disableUser,
+    updateUserStatus,
     deleteUser,
 
     // Drivers
     fetchDrivers,
-    updateDriverAvailability,
 
     // Pricing
     fetchPricingConfigs,
@@ -401,6 +449,16 @@ export const useAdmin = () => {
     deletePricingConfig,
     activatePricingConfig,
     deactivatePricingConfig,
+
+    // System Config
+    fetchSystemConfigs,
+    updateSystemConfig,
+
+    // Tracking
+    fetchAllTracking,
+
+    // Driver Payment
+    processDriverPayment,
 
     // Audit Logs
     fetchAuditLogs,

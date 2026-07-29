@@ -92,11 +92,11 @@ export const NOTIFICATION_API = {
 }
 
 // ===== Notification Routes =====
-export const NOTIFICATION_ROUTES = {
-  LIST: '/notifications',
-  DETAILS: '/notifications/:id',
-}
 
+export const NOTIFICATION_ROUTES = {
+  LIST: '/client/notifications',
+  DETAILS: '/client/notifications/:id',
+}
 // ===== Notification Defaults =====
 export const NOTIFICATION_DEFAULTS = {
   PAGE: 0,

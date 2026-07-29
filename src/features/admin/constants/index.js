@@ -7,12 +7,12 @@
 export const ADMIN_ROLES = {
   ADMIN: 'ADMIN',
   SUPER_ADMIN: 'SUPER_ADMIN',
-};
+}
 
 export const ADMIN_ROLES_LABELS = {
   [ADMIN_ROLES.ADMIN]: 'Admin',
   [ADMIN_ROLES.SUPER_ADMIN]: 'Super Admin',
-};
+}
 
 // ===== Admin Permissions =====
 export const ADMIN_PERMISSIONS = {
@@ -30,7 +30,7 @@ export const ADMIN_PERMISSIONS = {
   MANAGE_SYSTEM: 'MANAGE_SYSTEM',
   VIEW_AUDIT: 'VIEW_AUDIT',
   MANAGE_ADMINS: 'MANAGE_ADMINS',
-};
+}
 
 // ===== Admin Error Messages =====
 export const ADMIN_ERRORS = {
@@ -56,7 +56,7 @@ export const ADMIN_ERRORS = {
   INVALID_ROLE: 'Invalid role assignment',
   CANNOT_DELETE_SELF: 'Cannot delete your own account',
   CANNOT_DISABLE_SELF: 'Cannot disable your own account',
-};
+}
 
 // ===== Admin Success Messages =====
 export const ADMIN_SUCCESS = {
@@ -75,44 +75,60 @@ export const ADMIN_SUCCESS = {
   PRICING_DEACTIVATED: 'Pricing configuration deactivated',
   SYSTEM_CONFIG_UPDATED: 'System configuration updated successfully',
   REVENUE_REPORT_GENERATED: 'Revenue report generated successfully',
-};
+}
 
+// ===== Admin API Endpoints =====
 // ===== Admin API Endpoints =====
 export const ADMIN_API = {
   BASE: '/admin',
   DASHBOARD: '/admin/dashboard',
   SUPER_DASHBOARD: '/admin/dashboard/super',
   USERS: '/admin/users',
-  USERS_BY_ROLE: '/admin/users/role/{role}',
-  ENABLE_USER: '/admin/users/{id}/enable',
-  DISABLE_USER: '/admin/users/{id}/disable',
-  DELETE_USER: '/admin/users/{id}',
+  USERS_BY_ROLE: '/admin/users?role={role}',
+  USER_STATUS: '/admin/users/{userId}/status',
+  DELETE_USER: '/admin/users/{userId}',
   DRIVERS: '/admin/drivers',
   DRIVER_AVAILABILITY: '/admin/drivers/{id}/availability',
   DRIVER_LOCATION: '/admin/drivers/{id}/location',
+  DRIVER_PAYMENT: '/admin/drivers/{driverId}/payments',
   PRICING: '/admin/pricing',
   PRICING_ACTIVATE: '/admin/pricing/{id}/activate',
   PRICING_DEACTIVATE: '/admin/pricing/{id}/deactivate',
   SYSTEM_CONFIGS: '/admin/system/configs',
+  SYSTEM_CONFIG_UPDATE: '/admin/system/configs/{key}',
   AUDIT_LOGS: '/admin/audit-logs',
-  RECENT_ORDERS: '/admin/orders/recent',
-};
+  AUDIT_LOGS_USER: '/admin/audit-logs/user/{userId}',
+  TRACKING: '/admin/tracking',
+  RECENT_ORDERS: '/orders/recent',
+}
 
 // ===== Admin Routes =====
 export const ADMIN_ROUTES = {
   DASHBOARD: '/admin/dashboard',
   ORDERS: '/admin/orders',
   DRIVERS: '/admin/drivers',
+  VEHICLES: '/admin/vehicles',
+  FLEET: '/admin/fleet',
+  CUSTOMERS: '/admin/customers',
+  PAYMENTS: '/admin/payments',
   REVENUE: '/admin/revenue',
   PRICING: '/admin/pricing',
+  REVIEWS: '/admin/reviews',
+  NOTIFICATIONS: '/admin/notifications',
+  REPORTS: '/admin/reports',
+  ANALYTICS: '/admin/analytics',
   USERS: '/admin/users',
+  DISPATCH: '/admin/dispatch',
+  TRACKING: '/admin/tracking',
+  CRM: '/admin/crm',
+  TRACKING: '/admin/tracking',
   SUPER_DASHBOARD: '/super-admin/dashboard',
   SUPER_USERS: '/super-admin/users',
   ADMIN_MANAGEMENT: '/super-admin/admins',
   SYSTEM_CONFIG: '/super-admin/system',
   AUDIT_LOGS: '/super-admin/audit',
   GLOBAL_REVENUE: '/super-admin/revenue',
-};
+}
 
 // ===== Dashboard Defaults =====
 export const DASHBOARD_DEFAULTS = {
@@ -123,7 +139,7 @@ export const DASHBOARD_DEFAULTS = {
     users: '#8b5cf6',
     drivers: '#f59e0b',
   },
-};
+}
 
 // ===== User Management Defaults =====
 export const USER_MANAGEMENT_DEFAULTS = {
@@ -131,7 +147,7 @@ export const USER_MANAGEMENT_DEFAULTS = {
   SIZE: 20,
   SORT_BY: 'createdAt',
   SORT_DIRECTION: 'DESC',
-};
+}
 
 // ===== Audit Log Types =====
 export const AUDIT_ACTIONS = {
@@ -150,7 +166,7 @@ export const AUDIT_ACTIONS = {
   IMPORT: 'IMPORT',
   APPROVE: 'APPROVE',
   REJECT: 'REJECT',
-};
+}
 
 export const AUDIT_ENTITY_TYPES = {
   USER: 'USER',
@@ -161,4 +177,4 @@ export const AUDIT_ENTITY_TYPES = {
   SYSTEM_CONFIG: 'SYSTEM_CONFIG',
   REVENUE: 'REVENUE',
   ADMIN: 'ADMIN',
-};
+}

@@ -9,7 +9,6 @@ export const authService = {
     const response = await axiosInstance.post('/auth/register', userData)
     return response.data.data
   },
-  // ✅ Now accepts the full GoogleAuthRequestDTO object
   googleLogin: async (googleAuthData) => {
     const response = await axiosInstance.post('/auth/google', googleAuthData)
     return response.data.data
@@ -34,8 +33,9 @@ export const authService = {
     const response = await axiosInstance.get(`/auth/verify-email?token=${token}`)
     return response.data
   },
+  // FIXED: Use /users/profile instead of /auth/me
   getCurrentUser: async () => {
-    const response = await axiosInstance.get('/auth/me')
+    const response = await axiosInstance.get('/users/profile')
     return response.data.data
   },
 }

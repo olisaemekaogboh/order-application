@@ -31,7 +31,7 @@ import { CreateOrder, OrderTracking, OrderHistory, OrderManagement } from '../fe
 // Payments
 import { PaymentHistory } from '../features/payments'
 
-// Client (existing components)
+// Client
 import { ClientDashboard, ClientProfile, ClientAddresses } from '../features/client'
 
 // Reviews
@@ -46,7 +46,7 @@ import { DriverManagement } from '../features/drivers'
 // Analytics
 import { RevenueAnalytics, GlobalRevenue } from '../features/analytics'
 
-// Admin (existing components)
+// Admin
 import {
   AdminDashboard,
   SuperAdminDashboard,
@@ -58,7 +58,7 @@ import {
   SystemConfiguration,
 } from '../features/admin'
 
-// ---- NEW ADMIN COMPONENTS (they exist) ----
+// ---- New Admin Components ----
 import AdminCustomers from '../features/admin/components/AdminCustomers/AdminCustomers'
 import AdminPayments from '../features/admin/components/AdminPayments/AdminPayments'
 import AdminReviews from '../features/admin/components/AdminReviews/AdminReviews'
@@ -67,18 +67,16 @@ import AdminDispatch from '../features/admin/components/AdminDispatch/AdminDispa
 import AdminTracking from '../features/admin/components/AdminTracking/AdminTracking'
 import AdminFleet from '../features/admin/components/AdminFleet/AdminFleet'
 
-// ---- DRIVER COMPONENTS (they exist) ----
+// ---- Driver Components ----
 import DriverDashboard from '../features/drivers/components/DriverDashboard/DriverDashboard'
 import DriverOrders from '../features/drivers/components/DriverOrders/DriverOrders'
 import DriverEarnings from '../features/drivers/components/DriverEarnings/DriverEarnings'
 import DriverProfile from '../features/drivers/components/DriverProfile/DriverProfile'
 
-// ---- REPORTS (exists) ----
+// ---- Reports ----
 import ReportGenerator from '../features/reports/components/ReportGenerator/ReportGenerator'
 
-// ---------------------------------------------------------------------
-// Placeholder for components not yet implemented
-// ---------------------------------------------------------------------
+// Placeholder for missing components
 const Placeholder = ({ title }) => (
   <div className="flex items-center justify-center h-96">
     <div className="text-center">
@@ -91,9 +89,7 @@ const Placeholder = ({ title }) => (
 function AppRoutes() {
   return (
     <Routes>
-      {/* ===============================
-          PUBLIC
-          =============================== */}
+      {/* PUBLIC */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
@@ -101,9 +97,7 @@ function AppRoutes() {
         <Route path="/contact" element={<ContactPage />} />
       </Route>
 
-      {/* ===============================
-          AUTH
-          =============================== */}
+      {/* AUTH */}
       <Route element={<PublicRoute />}>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
@@ -114,19 +108,14 @@ function AppRoutes() {
         </Route>
       </Route>
 
-      {/* ===============================
-          CLIENT
-          =============================== */}
+      {/* CLIENT */}
       <Route element={<PrivateRoute allowedRoles={['CLIENT']} />}>
         <Route element={<DashboardLayout />}>
           <Route path="/client/dashboard" element={<ClientDashboard />} />
 
-          {/* Orders */}
-          <Route path="/client/orders" element={<OrderHistory />} />
-          <Route path="/client/orders/create" element={<CreateOrder />} />
-          <Route path="/client/orders/:id" element={<OrderTracking />} />
-          <Route path="/client/orders/:id/edit" element={<Placeholder title="Edit Order" />} />
-          <Route path="/client/orders/history" element={<OrderHistory />} />
+          {/* Orders – using exact constants */}
+          <Route path="/client/create-order" element={<CreateOrder />} />
+          <Route path="/client/order-history" element={<OrderHistory />} />
           <Route path="/client/order-tracking/:id" element={<OrderTracking />} />
 
           {/* Payments */}
@@ -159,9 +148,7 @@ function AppRoutes() {
         </Route>
       </Route>
 
-      {/* ===============================
-          DRIVER
-          =============================== */}
+      {/* DRIVER */}
       <Route element={<PrivateRoute allowedRoles={['DRIVER']} />}>
         <Route element={<DashboardLayout />}>
           <Route path="/driver/dashboard" element={<DriverDashboard />} />
@@ -176,14 +163,10 @@ function AppRoutes() {
         </Route>
       </Route>
 
-      {/* ===============================
-          ADMIN
-          =============================== */}
+      {/* ADMIN */}
       <Route element={<PrivateRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-          {/* Orders */}
           <Route path="/admin/orders" element={<OrderManagement />} />
           <Route
             path="/admin/orders/create"
@@ -194,68 +177,36 @@ function AppRoutes() {
             path="/admin/orders/:id/edit"
             element={<Placeholder title="Edit Order (Admin)" />}
           />
-
-          {/* Dispatch */}
           <Route path="/admin/dispatch" element={<AdminDispatch />} />
           <Route path="/admin/dispatch/live" element={<Placeholder title="Live Dispatch" />} />
-
-          {/* Tracking */}
           <Route path="/admin/tracking" element={<AdminTracking />} />
           <Route path="/admin/tracking/live" element={<Placeholder title="Live Tracking" />} />
-
-          {/* Drivers */}
           <Route path="/admin/drivers" element={<DriverManagement />} />
           <Route path="/admin/drivers/new" element={<Placeholder title="New Driver" />} />
           <Route path="/admin/drivers/:id" element={<Placeholder title="Driver Details" />} />
           <Route path="/admin/drivers/:id/edit" element={<Placeholder title="Edit Driver" />} />
-
-          {/* Vehicles */}
           <Route path="/admin/vehicles" element={<AdminVehicles />} />
           <Route path="/admin/vehicles/new" element={<Placeholder title="New Vehicle" />} />
           <Route path="/admin/vehicles/:id" element={<Placeholder title="Vehicle Details" />} />
           <Route path="/admin/vehicles/:id/edit" element={<Placeholder title="Edit Vehicle" />} />
-
-          {/* Fleet */}
           <Route path="/admin/fleet" element={<AdminFleet />} />
           <Route path="/admin/fleet/maintenance" element={<Placeholder title="Maintenance" />} />
-
-          {/* Customers */}
           <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/customers/:id" element={<Placeholder title="Customer Details" />} />
-
-          {/* Payments */}
           <Route path="/admin/payments" element={<AdminPayments />} />
           <Route path="/admin/payment-history" element={<AdminPayments />} />
-
-          {/* Revenue */}
           <Route path="/admin/revenue" element={<RevenueAnalytics />} />
-
-          {/* Pricing */}
           <Route path="/admin/pricing" element={<PricingConfiguration />} />
-
-          {/* Reviews */}
           <Route path="/admin/reviews" element={<AdminReviews />} />
-
-          {/* Notifications */}
           <Route path="/admin/notifications" element={<NotificationPage />} />
-
-          {/* CRM */}
           <Route path="/admin/crm" element={<Placeholder title="CRM" />} />
-
-          {/* Reports */}
           <Route path="/admin/reports" element={<ReportGenerator />} />
-
-          {/* Analytics */}
           <Route path="/admin/analytics" element={<Placeholder title="Analytics" />} />
-
-          {/* Users */}
           <Route path="/admin/users" element={<UserManagement />} />
         </Route>
       </Route>
 
-      {/* ===============================
-          SUPER ADMIN
-          =============================== */}
+      {/* SUPER ADMIN */}
       <Route element={<PrivateRoute allowedRoles={['SUPER_ADMIN']} />}>
         <Route element={<SuperAdminLayout />}>
           <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
@@ -277,9 +228,7 @@ function AppRoutes() {
         </Route>
       </Route>
 
-      {/* ===============================
-          SHARED (Error pages)
-          =============================== */}
+      {/* SHARED */}
       <Route path="/403" element={<Placeholder title="403 - Forbidden" />} />
       <Route path="/404" element={<Placeholder title="404 - Page Not Found" />} />
       <Route path="/500" element={<Placeholder title="500 - Server Error" />} />
