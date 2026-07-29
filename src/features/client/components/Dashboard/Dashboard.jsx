@@ -93,6 +93,13 @@ export default function Dashboard() {
       description: 'Update your personal information.',
       onClick: () => navigate(CLIENT_ROUTES.PROFILE),
     },
+    // === NEW: Reviews quick action ===
+    {
+      id: 'reviews',
+      label: 'My Reviews',
+      description: 'View and manage your reviews.',
+      onClick: () => navigate(CLIENT_ROUTES.REVIEWS),
+    },
   ]
 
   if (loading) {
@@ -126,19 +133,11 @@ export default function Dashboard() {
       {/* Charts */}
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <OrderTrendChart
-            data={monthlyOrders}
-
-            loading={loading}
-          />
+          <OrderTrendChart data={monthlyOrders} loading={loading} />
         </div>
 
-        <DeliveryStatusChart
-          data={deliveryStatus}
-
-          loading={loading}
-        />
-      </div>{' '}
+        <DeliveryStatusChart data={deliveryStatus} loading={loading} />
+      </div>
       {/* Spending */}
       <SpendingChart data={monthlySpending} loading={loading} />
       {/* Recent Orders */}

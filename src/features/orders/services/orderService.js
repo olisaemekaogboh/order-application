@@ -45,21 +45,41 @@ export const orderService = {
 
   assignDriver: async (orderId, driverId) => {
     const response = await axiosInstance.put(`/orders/${orderId}/assign-driver`, { driverId })
-    return response.data
+    return response.data.data
   },
 
+  // --- FIXED ENDPOINTS ---
   getOrderCount: async () => {
-    const response = await axiosInstance.get('/orders/my-orders/count')
+    const response = await axiosInstance.get('/orders/count')
     return response.data.data
   },
 
   getActiveOrderCount: async () => {
-    const response = await axiosInstance.get('/orders/my-orders/active-count')
+    const response = await axiosInstance.get('/orders/count-active')
     return response.data.data
   },
 
   getRecentOrders: async (limit = 5) => {
-    const response = await axiosInstance.get(`/orders/my-orders/recent?limit=${limit}`)
+    const response = await axiosInstance.get('/orders/recent', { params: { limit } })
+    return response.data.data
+  },
+
+  // --- NEW ---
+  getOrderByNumber: async (orderNumber) => {
+    const response = await axiosInstance.get(`/orders/number/${orderNumber}`)
+    return response.data.data
+  },
+
+  // --- OPTIONAL ---
+  updatePaymentStatus: async (orderId, paymentStatus) => {
+    const response = await axiosInstance.put(`/orders/${orderId}/payment`, { paymentStatus })
+    return response.data.data
+  },
+
+  updateTrackingInfo: async (orderId, trackingData) => {
+    const response = await axiosInstance.put(`/orders/${orderId}/tracking`, trackingData)
     return response.data.data
   },
 }
+
+export default orderService

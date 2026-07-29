@@ -22,25 +22,32 @@ export const initializePayment = async (data) => {
 }
 
 /**
- * Process a payment
- * @param {Object} data - Payment processing data
- * @param {string} data.orderId - Order ID
- * @param {string} data.paymentMethod - Payment method
- * @param {string} data.paymentDetails - Payment details (e.g., card token, bank details)
- * @returns {Promise} Payment processing response
+ * Verify a payment (POST with transactionReference in body)
+ * @param {Object} data - { transactionReference: string }
+ * @returns {Promise} Payment verification response
  */
-export const processPayment = async (data) => {
-  const response = await axiosInstance.post(PAYMENT_API.PROCESS, data)
+export const verifyPayment = async (data) => {
+  const response = await axiosInstance.post('/payments/verify', data)
   return response.data.data
 }
 
 /**
- * Verify a payment by transaction reference
- * @param {string} reference - Transaction reference
- * @returns {Promise} Payment verification response
+ * Cancel a pending payment
+ * @param {Object} data - { transactionReference: string }
+ * @returns {Promise} Cancellation response
  */
-export const verifyPayment = async (reference) => {
-  const response = await axiosInstance.get(PAYMENT_API.VERIFY.replace('{reference}', reference))
+export const cancelPayment = async (data) => {
+  const response = await axiosInstance.put('/payments/cancel', data)
+  return response.data.data
+}
+
+/**
+ * Refund a payment (POST with body)
+ * @param {Object} data - { transactionReference, amount, reason }
+ * @returns {Promise} Refund response
+ */
+export const refundPayment = async (data) => {
+  const response = await axiosInstance.post('/payments/refund', data)
   return response.data.data
 }
 
@@ -50,7 +57,7 @@ export const verifyPayment = async (reference) => {
  * @returns {Promise} Payment data
  */
 export const getPaymentByOrder = async (orderId) => {
-  const response = await axiosInstance.get(PAYMENT_API.GET_BY_ORDER.replace('{orderId}', orderId))
+  const response = await axiosInstance.get(`/payments/order/${orderId}`)
   return response.data.data
 }
 
@@ -60,69 +67,51 @@ export const getPaymentByOrder = async (orderId) => {
  * @returns {Promise} Payment data
  */
 export const getPaymentByReference = async (reference) => {
-  const response = await axiosInstance.get(
-    PAYMENT_API.GET_BY_REFERENCE.replace('{reference}', reference)
-  )
+  const response = await axiosInstance.get(`/payments/reference/${reference}`)
   return response.data.data
 }
 
 /**
- * Get user's payment history
+ * Get user's payment history (paginated)
  * @param {Object} params - Query parameters (page, size, status, etc.)
  * @returns {Promise} Paginated payment list
  */
 export const getUserPayments = async (params = {}) => {
-  const response = await axiosInstance.get(PAYMENT_API.GET_USER_PAYMENTS, { params })
-  return response.data.data
-}
-
-/**
- * Refund a payment
- * @param {string} paymentId - Payment ID
- * @param {Object} data - Refund data
- * @param {number} data.amount - Refund amount
- * @param {string} data.reason - Refund reason
- * @param {string} data.note - Additional note (optional)
- * @returns {Promise} Refund response
- */
-export const refundPayment = async (paymentId, data) => {
-  const response = await axiosInstance.post(PAYMENT_API.REFUND.replace('{id}', paymentId), data)
+  const response = await axiosInstance.get('/payments/user', { params })
   return response.data.data
 }
 
 /**
  * Get payment status (shortcut)
  * @param {string} reference - Transaction reference
- * @returns {Promise} Payment status
+ * @returns {Promise} Payment status string
  */
 export const getPaymentStatus = async (reference) => {
-  const response = await axiosInstance.get(
-    PAYMENT_API.GET_BY_REFERENCE.replace('{reference}', reference)
-  )
-  return response.data.data?.status
+  const payment = await getPaymentByReference(reference)
+  return payment?.status
 }
 
 /**
- * Handle payment callback (webhook)
- * @param {Object} payload - Callback payload from gateway
- * @returns {Promise} Callback processing response
+ * Handle payment callback (webhook) - used by server, not frontend
+ * (This is usually not called from frontend; we keep it for completeness)
  */
 export const handlePaymentCallback = async (payload) => {
-  const response = await axiosInstance.post(PAYMENT_API.CALLBACK, payload)
-  return response.data
+  // Not a frontend endpoint; kept for reference
+  console.warn('handlePaymentCallback is intended for server-side webhook handling')
+  return null
 }
 
 // ===== Convenience exports =====
 export const paymentService = {
   initializePayment,
-  processPayment,
   verifyPayment,
+  cancelPayment,
+  refundPayment,
   getPaymentByOrder,
   getPaymentByReference,
   getUserPayments,
-  refundPayment,
   getPaymentStatus,
-  handlePaymentCallback,
+  // processPayment removed (no such endpoint)
 }
 
 export default paymentService

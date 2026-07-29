@@ -10,6 +10,7 @@ export const CLIENT_ROUTES = {
   PAYMENTS: '/client/payments',
   CREATE_ORDER: '/client/create-order',
   ORDER_TRACKING: '/client/order-tracking/:id',
+  REVIEWS: '/client/reviews',
 }
 
 export const CLIENT_DEFAULTS = {
