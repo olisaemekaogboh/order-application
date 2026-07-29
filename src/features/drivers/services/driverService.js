@@ -45,4 +45,24 @@ export const driverService = {
     const response = await axiosInstance.post(`/drivers/${id}/payments?amount=${amount}`)
     return response.data
   },
+
+  getDriverOrders: async (driverId, params) => {
+    const response = await axiosInstance.get(`/orders/driver`, { params }) // or use /orders/driver?driverId
+    return response.data.data
+  },
+
+  getDriverEarnings: async (driverId, params) => {
+    const response = await axiosInstance.get(`/drivers/${driverId}/earnings`, { params })
+    return response.data.data
+  },
+
+  getDriverProfile: async (driverId) => {
+    const response = await axiosInstance.get(`/drivers/${driverId}`)
+    return response.data.data
+  },
+
+  updateDriverProfile: async (driverId, data) => {
+    const response = await axiosInstance.put(`/drivers/${driverId}`, data)
+    return response.data.data
+  },
 }

@@ -43,6 +43,15 @@ export const reviewService = {
     const response = await axiosInstance.post(`/reviews/${reviewId}/report`, data)
     return response.data.data
   },
+  // In src/features/reviews/services/reviewService.js
+  getAllReviews: async (params = {}) => {
+    const response = await axiosInstance.get('/reviews', { params })
+    return response.data.data
+  },
+  moderateReview: async (reviewId, data) => {
+    const response = await axiosInstance.put(`/reviews/${reviewId}/moderate`, data)
+    return response.data.data
+  },
 }
 
 export default reviewService

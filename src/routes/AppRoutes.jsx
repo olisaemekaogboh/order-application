@@ -31,7 +31,7 @@ import { CreateOrder, OrderTracking, OrderHistory, OrderManagement } from '../fe
 // Payments
 import { PaymentHistory } from '../features/payments'
 
-// Client
+// Client (existing components)
 import { ClientDashboard, ClientProfile, ClientAddresses } from '../features/client'
 
 // Reviews
@@ -46,7 +46,7 @@ import { DriverManagement } from '../features/drivers'
 // Analytics
 import { RevenueAnalytics, GlobalRevenue } from '../features/analytics'
 
-// Admin
+// Admin (existing components)
 import {
   AdminDashboard,
   SuperAdminDashboard,
@@ -58,7 +58,27 @@ import {
   SystemConfiguration,
 } from '../features/admin'
 
-// Placeholder for missing components (can be replaced later)
+// ---- NEW ADMIN COMPONENTS (they exist) ----
+import AdminCustomers from '../features/admin/components/AdminCustomers/AdminCustomers'
+import AdminPayments from '../features/admin/components/AdminPayments/AdminPayments'
+import AdminReviews from '../features/admin/components/AdminReviews/AdminReviews'
+import AdminVehicles from '../features/admin/components/AdminVehicles/AdminVehicles'
+import AdminDispatch from '../features/admin/components/AdminDispatch/AdminDispatch'
+import AdminTracking from '../features/admin/components/AdminTracking/AdminTracking'
+import AdminFleet from '../features/admin/components/AdminFleet/AdminFleet'
+
+// ---- DRIVER COMPONENTS (they exist) ----
+import DriverDashboard from '../features/drivers/components/DriverDashboard/DriverDashboard'
+import DriverOrders from '../features/drivers/components/DriverOrders/DriverOrders'
+import DriverEarnings from '../features/drivers/components/DriverEarnings/DriverEarnings'
+import DriverProfile from '../features/drivers/components/DriverProfile/DriverProfile'
+
+// ---- REPORTS (exists) ----
+import ReportGenerator from '../features/reports/components/ReportGenerator/ReportGenerator'
+
+// ---------------------------------------------------------------------
+// Placeholder for components not yet implemented
+// ---------------------------------------------------------------------
 const Placeholder = ({ title }) => (
   <div className="flex items-center justify-center h-96">
     <div className="text-center">
@@ -144,14 +164,14 @@ function AppRoutes() {
           =============================== */}
       <Route element={<PrivateRoute allowedRoles={['DRIVER']} />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/driver/dashboard" element={<Placeholder title="Driver Dashboard" />} />
-          <Route path="/driver/orders" element={<Placeholder title="Driver Orders" />} />
+          <Route path="/driver/dashboard" element={<DriverDashboard />} />
+          <Route path="/driver/orders" element={<DriverOrders />} />
           <Route path="/driver/orders/:id" element={<Placeholder title="Driver Order Details" />} />
-          <Route path="/driver/assigned-orders" element={<Placeholder title="Assigned Orders" />} />
-          <Route path="/driver/history" element={<Placeholder title="Driver History" />} />
-          <Route path="/driver/profile" element={<Placeholder title="Driver Profile" />} />
+          <Route path="/driver/assigned-orders" element={<DriverOrders />} />
+          <Route path="/driver/history" element={<DriverOrders />} />
+          <Route path="/driver/profile" element={<DriverProfile />} />
           <Route path="/driver/change-password" element={<Placeholder title="Change Password" />} />
-          <Route path="/driver/earnings" element={<Placeholder title="Driver Earnings" />} />
+          <Route path="/driver/earnings" element={<DriverEarnings />} />
           <Route path="/driver/notifications" element={<NotificationPage />} />
         </Route>
       </Route>
@@ -176,11 +196,11 @@ function AppRoutes() {
           />
 
           {/* Dispatch */}
-          <Route path="/admin/dispatch" element={<Placeholder title="Dispatch Management" />} />
+          <Route path="/admin/dispatch" element={<AdminDispatch />} />
           <Route path="/admin/dispatch/live" element={<Placeholder title="Live Dispatch" />} />
 
           {/* Tracking */}
-          <Route path="/admin/tracking" element={<Placeholder title="Admin Tracking" />} />
+          <Route path="/admin/tracking" element={<AdminTracking />} />
           <Route path="/admin/tracking/live" element={<Placeholder title="Live Tracking" />} />
 
           {/* Drivers */}
@@ -190,22 +210,22 @@ function AppRoutes() {
           <Route path="/admin/drivers/:id/edit" element={<Placeholder title="Edit Driver" />} />
 
           {/* Vehicles */}
-          <Route path="/admin/vehicles" element={<Placeholder title="Vehicle Management" />} />
+          <Route path="/admin/vehicles" element={<AdminVehicles />} />
           <Route path="/admin/vehicles/new" element={<Placeholder title="New Vehicle" />} />
           <Route path="/admin/vehicles/:id" element={<Placeholder title="Vehicle Details" />} />
           <Route path="/admin/vehicles/:id/edit" element={<Placeholder title="Edit Vehicle" />} />
 
           {/* Fleet */}
-          <Route path="/admin/fleet" element={<Placeholder title="Fleet Management" />} />
+          <Route path="/admin/fleet" element={<AdminFleet />} />
           <Route path="/admin/fleet/maintenance" element={<Placeholder title="Maintenance" />} />
 
           {/* Customers */}
-          <Route path="/admin/customers" element={<Placeholder title="Customer Management" />} />
+          <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/customers/:id" element={<Placeholder title="Customer Details" />} />
 
           {/* Payments */}
-          <Route path="/admin/payments" element={<Placeholder title="Payment Management" />} />
-          <Route path="/admin/payment-history" element={<Placeholder title="Payment History" />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
+          <Route path="/admin/payment-history" element={<AdminPayments />} />
 
           {/* Revenue */}
           <Route path="/admin/revenue" element={<RevenueAnalytics />} />
@@ -214,7 +234,7 @@ function AppRoutes() {
           <Route path="/admin/pricing" element={<PricingConfiguration />} />
 
           {/* Reviews */}
-          <Route path="/admin/reviews" element={<Placeholder title="Review Management" />} />
+          <Route path="/admin/reviews" element={<AdminReviews />} />
 
           {/* Notifications */}
           <Route path="/admin/notifications" element={<NotificationPage />} />
@@ -223,7 +243,7 @@ function AppRoutes() {
           <Route path="/admin/crm" element={<Placeholder title="CRM" />} />
 
           {/* Reports */}
-          <Route path="/admin/reports" element={<Placeholder title="Reports" />} />
+          <Route path="/admin/reports" element={<ReportGenerator />} />
 
           {/* Analytics */}
           <Route path="/admin/analytics" element={<Placeholder title="Analytics" />} />
@@ -250,15 +270,9 @@ function AppRoutes() {
             element={<Placeholder title="Super Admin Analytics" />}
           />
           <Route path="/super-admin/drivers" element={<DriverManagement />} />
-          <Route
-            path="/super-admin/vehicles"
-            element={<Placeholder title="Super Admin Vehicles" />}
-          />
+          <Route path="/super-admin/vehicles" element={<AdminVehicles />} />
           <Route path="/super-admin/orders" element={<OrderManagement />} />
-          <Route
-            path="/super-admin/customers"
-            element={<Placeholder title="Super Admin Customers" />}
-          />
+          <Route path="/super-admin/customers" element={<AdminCustomers />} />
           <Route path="/super-admin/notifications" element={<NotificationPage />} />
         </Route>
       </Route>
