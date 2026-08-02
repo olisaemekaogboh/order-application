@@ -3,22 +3,42 @@ import NotificationContext from './NotificationContext'
 import { notificationService } from '../../services/notificationService'
 import { useSocket } from '@/shared/hooks/useSocket'
 import { SOCKET_EVENTS } from '@/shared/services/websocket/socketEvents'
-import { useAuth } from '../../../auth/hooks/useAuth' // adjust path if needed
+import { useAuth } from '../../../auth/hooks/useAuth'
 
 export const NotificationProvider = ({ children }) => {
   const { isAuthenticated } = useAuth()
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [pagination, setPagination] = useState({
+    page: 0,
+    size: 20,
+    total: 0,
+    totalPages: 0,
+  })
 
-  const fetchNotifications = async () => {
-    if (!isAuthenticated) return // only fetch if authenticated
+  const fetchNotifications = async (params = {}) => {
+    if (!isAuthenticated) return
+    setLoading(true)
     try {
-      const data = await notificationService.getNotifications({ page: 0, size: 20 })
+      const data = await notificationService.getNotifications({
+        page: pagination.page,
+        size: pagination.size,
+        ...params,
+      })
       setNotifications(data.content || [])
+      setPagination({
+        page: data.page || 0,
+        size: data.size || 20,
+        total: data.total || 0,
+        totalPages: data.totalPages || 0,
+      })
       const unread = data.content?.filter((n) => !n.read).length || 0
       setUnreadCount(unread)
     } catch (error) {
       console.debug('Failed to fetch notifications:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -34,7 +54,7 @@ export const NotificationProvider = ({ children }) => {
 
   useEffect(() => {
     fetchNotifications()
-  }, [isAuthenticated]) // re-fetch when auth state changes
+  }, [isAuthenticated])
 
   const markAsRead = async (id) => {
     try {
@@ -56,9 +76,55 @@ export const NotificationProvider = ({ children }) => {
     }
   }
 
+  const deleteNotification = async (id) => {
+    try {
+      await notificationService.deleteNotification(id)
+      setNotifications((prev) => prev.filter((n) => n.id !== id))
+    } catch (error) {
+      console.debug('Failed to delete notification:', error)
+    }
+  }
+
+  const deleteAllNotifications = async () => {
+    try {
+      await notificationService.deleteAllNotifications()
+      setNotifications([])
+      setUnreadCount(0)
+    } catch (error) {
+      console.debug('Failed to delete all notifications:', error)
+    }
+  }
+
+  const getUnreadCount = async () => {
+    try {
+      const count = await notificationService.getUnreadCount()
+      setUnreadCount(count || 0)
+      return count
+    } catch (error) {
+      console.debug('Failed to get unread count:', error)
+      return 0
+    }
+  }
+
+  const changePage = (page) => {
+    setPagination((prev) => ({ ...prev, page }))
+  }
+
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead }}
+      value={{
+        notifications,
+        unreadCount,
+        loading,
+        pagination,
+        fetchNotifications,
+        markAsRead,
+        markAllAsRead,
+        deleteNotification,
+        deleteAllNotifications,
+        getUnreadCount,
+        changePage,
+      }}
     >
       {children}
     </NotificationContext.Provider>

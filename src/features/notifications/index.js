@@ -1,3 +1,4 @@
+// features/notifications/index.js
 /**
  * Notifications Feature Index
  * Main entry point for the notifications feature
@@ -6,6 +7,7 @@
 // ===== Components =====
 export { default as NotificationBell } from './components/NotificationBell/NotificationBell'
 export { default as NotificationPage } from './components/NotificationPage/NotificationPage'
+export { default as AdminNotificationBroadcast } from './components/AdminNotificationBroadcast/AdminNotificationBroadcast'
 export { NotificationProvider } from './components/NotificationContext/NotificationProvider'
 
 // ===== Hooks =====

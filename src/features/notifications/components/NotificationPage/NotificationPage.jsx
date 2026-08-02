@@ -1,17 +1,23 @@
+// features/notifications/components/NotificationPage/NotificationPage.jsx
 import React, { useState, useEffect } from 'react'
 import { useNotifications } from '../../hooks/useNotifications'
+import { useAuth } from '../../../auth/hooks/useAuth'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import Badge from '@/shared/components/ui/Badge/Badge'
 import Button from '@/shared/components/ui/Button/Button'
 import EmptyState from '@/shared/components/ui/EmptyState/EmptyState'
 import Tabs from '@/shared/components/ui/Tabs/Tabs'
+import AdminNotificationBroadcast from '../AdminNotificationBroadcast/AdminNotificationBroadcast'
 import { Bell, CheckCheck, Trash2, X, CheckCircle } from 'lucide-react'
 import { NOTIFICATION_TYPES_LABELS } from '../../constants'
 import { formatNotificationTime } from '../../utils'
 import toast from 'react-hot-toast'
 
 const NotificationPage = () => {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
+
   const {
     notifications,
     unreadCount,
@@ -34,8 +40,10 @@ const NotificationPage = () => {
   const [selectAll, setSelectAll] = useState(false)
 
   useEffect(() => {
-    fetchNotifications()
-  }, [fetchNotifications])
+    // Fetch notifications with current filter
+    const params = filter !== 'all' ? { status: filter } : {}
+    fetchNotifications(params)
+  }, [fetchNotifications, filter, pagination.page])
 
   const handleToggleSelect = (id) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
@@ -138,6 +146,14 @@ const NotificationPage = () => {
     },
   ]
 
+  if (loading && notifications.length === 0) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner size="lg" />
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
@@ -163,6 +179,9 @@ const NotificationPage = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Broadcast Button - Only for Admins */}
+          {isAdmin && <AdminNotificationBroadcast />}
+
           {selectedIds.length > 0 && (
             <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-1.5">
               <span className="text-sm text-blue-700 dark:text-blue-300">
@@ -232,11 +251,7 @@ const NotificationPage = () => {
       </div>
 
       {/* Notification List */}
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <Spinner size="lg" />
-        </div>
-      ) : notifications.length === 0 ? (
+      {notifications.length === 0 ? (
         <EmptyState
           icon="🔔"
           title="No notifications"
@@ -362,18 +377,20 @@ const NotificationPage = () => {
           </div>
 
           {/* Pagination */}
-          <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {pagination.page * pagination.size + 1} to{' '}
-              {Math.min((pagination.page + 1) * pagination.size, pagination.total)} of{' '}
-              {pagination.total} notifications
+          {pagination.totalPages > 1 && (
+            <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {pagination.page * pagination.size + 1} to{' '}
+                {Math.min((pagination.page + 1) * pagination.size, pagination.total)} of{' '}
+                {pagination.total} notifications
+              </div>
+              <Pagination
+                currentPage={pagination.page + 1}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => changePage(page - 1)}
+              />
             </div>
-            <Pagination
-              currentPage={pagination.page + 1}
-              totalPages={pagination.totalPages}
-              onPageChange={(page) => changePage(page - 1)}
-            />
-          </div>
+          )}
         </>
       )}
     </div>

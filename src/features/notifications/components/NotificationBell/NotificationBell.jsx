@@ -1,33 +1,52 @@
 import React, { useState, useEffect } from 'react'
-import { useNotifications } from '../../hooks/useNotifications'
 import { Bell } from 'lucide-react'
 import { formatNotificationTime } from '../../utils'
 import { useNavigate } from 'react-router-dom'
 import { NOTIFICATION_ROUTES } from '../../constants'
+import { useNotifications } from '../../hooks/useNotifications'
+import { useAuth } from '../../../auth/hooks/useAuth'
 
 export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const { notifications, unreadCount, fetchUnreadCount, markAsRead, isConnected } =
-    useNotifications()
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    fetchNotifications,
+    fetchUnreadCount,
+    markAsRead,
+    markAllAsRead,
+    isConnected,
+  } = useNotifications()
+
+  // Fetch notifications on mount and when authenticated
   useEffect(() => {
-    fetchUnreadCount()
-  }, [fetchUnreadCount])
+    if (isAuthenticated) {
+      fetchUnreadCount()
+      // Fetch the latest 5 notifications for the dropdown
+      fetchNotifications({ page: 0, size: 5 })
+    }
+  }, [isAuthenticated])
+
+  // Refresh when bell is opened
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      fetchUnreadCount()
+      fetchNotifications({ page: 0, size: 5 })
+    }
+  }, [isOpen])
 
   const handleToggle = () => {
     setIsOpen(!isOpen)
-    if (!isOpen) {
-      // Refresh count when opening
-      fetchUnreadCount()
-    }
   }
 
   const handleNotificationClick = async (notification) => {
     if (!notification.read) {
       await markAsRead(notification.id)
     }
-    // Navigate to related entity if actionUrl exists
     if (notification.actionUrl) {
       navigate(notification.actionUrl)
     } else {
@@ -39,6 +58,18 @@ export const NotificationBell = () => {
   const handleViewAll = () => {
     navigate(NOTIFICATION_ROUTES.LIST)
     setIsOpen(false)
+  }
+
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead()
+    // Refresh after marking all as read
+    fetchUnreadCount()
+    fetchNotifications({ page: 0, size: 5 })
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null
   }
 
   const recentNotifications = notifications.slice(0, 5)
@@ -67,10 +98,7 @@ export const NotificationBell = () => {
             <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
             {unreadCount > 0 && (
               <button
-                onClick={() => {
-                  // Mark all as read would be called from parent or context
-                  // We'll expose markAllAsRead from useNotifications if needed
-                }}
+                onClick={handleMarkAllAsRead}
                 className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400"
               >
                 Mark all read
@@ -78,9 +106,13 @@ export const NotificationBell = () => {
             )}
           </div>
           <div className="max-h-72 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
-            {recentNotifications.length === 0 ? (
+            {loading ? (
               <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                No notifications
+                Loading...
+              </div>
+            ) : recentNotifications.length === 0 ? (
+              <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                {unreadCount > 0 ? 'Loading notifications...' : 'No notifications'}
               </div>
             ) : (
               recentNotifications.map((notification) => (
