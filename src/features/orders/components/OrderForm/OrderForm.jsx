@@ -1,3 +1,4 @@
+// OrderForm.jsx - Add the onAddressChange prop and use it
 import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { VEHICLE_TYPES, VEHICLE_TYPES_LABELS } from '../../constants'
@@ -9,6 +10,7 @@ const OrderForm = ({
   vehicleOptions = [],
   selectedVehicle = '',
   onVehicleChange,
+  onAddressChange, // Add this prop
 }) => {
   const {
     register,
@@ -30,20 +32,30 @@ const OrderForm = ({
   })
 
   const vehicleType = watch('vehicleType')
+  const pickupLocation = watch('pickupLocation')
+  const deliveryLocation = watch('deliveryLocation')
 
-  // Notify parent when vehicle changes
   useEffect(() => {
     if (onVehicleChange && vehicleType) {
       onVehicleChange(vehicleType)
     }
   }, [vehicleType, onVehicleChange])
 
-  // When selectedVehicle from parent changes (e.g., default), update form
   useEffect(() => {
     if (selectedVehicle) {
       setValue('vehicleType', selectedVehicle)
     }
   }, [selectedVehicle, setValue])
+
+  // Trigger address change when both locations are filled
+  useEffect(() => {
+    if (pickupLocation && deliveryLocation && onAddressChange) {
+      const debounce = setTimeout(() => {
+        onAddressChange(pickupLocation, deliveryLocation)
+      }, 500)
+      return () => clearTimeout(debounce)
+    }
+  }, [pickupLocation, deliveryLocation, onAddressChange])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -127,8 +139,7 @@ const OrderForm = ({
                     {VEHICLE_TYPES_LABELS[opt.vehicleType] || opt.vehicleType}
                   </option>
                 ))
-              : // Fallback to all allowed enum values
-                Object.entries(VEHICLE_TYPES_LABELS).map(([value, label]) => (
+              : Object.entries(VEHICLE_TYPES_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
                   </option>

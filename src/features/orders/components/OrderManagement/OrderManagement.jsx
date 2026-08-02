@@ -1,6 +1,8 @@
+// OrderManagement.jsx
 import React, { useState, useEffect } from 'react'
 import { useOrders } from '../../../orders/hooks/useOrders'
 import OrderTable from '../../../orders/components/OrderTable/OrderTable'
+import OrderDetailsModal from '../../../orders/components/OrderDetailsModal/OrderDetailsModal'
 import SearchBar from '@/shared/components/ui/SearchBar/SearchBar'
 import Select from '@/shared/components/ui/Select/Select'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
@@ -11,11 +13,22 @@ import DriverAssignmentModal from '@/features/drivers/components/DriverAssignmen
 import toast from 'react-hot-toast'
 
 const OrderManagement = () => {
-  const { orders, loading, pagination, fetchAllOrders, changePage, assignDriver } = useOrders()
+  const {
+    orders,
+    loading,
+    pagination,
+    fetchAllOrders,
+    changePage,
+    assignDriver,
+    updateOrderStatus,
+    cancelOrder,
+  } = useOrders()
+
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [showAssignmentModal, setShowAssignmentModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
 
   useEffect(() => {
     fetchAllOrders({
@@ -37,6 +50,18 @@ const OrderManagement = () => {
     }
   }
 
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order)
+    setShowDetailsModal(true)
+  }
+
+  const handleCancelOrder = async (orderId) => {
+    const reason = window.prompt('Please enter cancellation reason:')
+    if (reason !== null) {
+      await cancelOrder(orderId, reason)
+    }
+  }
+
   const statusOptions = [
     { value: '', label: 'All Statuses' },
     ...Object.entries(ORDER_STATUSES_LABELS).map(([value, label]) => ({ value, label })),
@@ -52,8 +77,10 @@ const OrderManagement = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Order Management</h1>
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Order Management ({pagination.total})
+        </h1>
         <div className="flex flex-col sm:flex-row gap-4">
           <SearchBar
             placeholder="Search orders..."
@@ -80,19 +107,25 @@ const OrderManagement = () => {
               setSelectedOrder(order)
               setShowAssignmentModal(true)
             }}
+            onViewDetails={handleViewDetails}
+            onUpdateStatus={updateOrderStatus}
+            onCancel={handleCancelOrder}
           />
-          <div className="mt-6 flex justify-between items-center">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {pagination.page * pagination.size + 1} to{' '}
-              {Math.min((pagination.page + 1) * pagination.size, pagination.total)} of{' '}
-              {pagination.total} orders
+
+          {pagination.totalPages > 1 && (
+            <div className="mt-6 flex justify-between items-center">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {pagination.page * pagination.size + 1} to{' '}
+                {Math.min((pagination.page + 1) * pagination.size, pagination.total)} of{' '}
+                {pagination.total} orders
+              </div>
+              <Pagination
+                currentPage={pagination.page + 1}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => changePage(page - 1)}
+              />
             </div>
-            <Pagination
-              currentPage={pagination.page + 1}
-              totalPages={pagination.totalPages}
-              onPageChange={(page) => changePage(page - 1)}
-            />
-          </div>
+          )}
         </>
       )}
 
@@ -104,6 +137,15 @@ const OrderManagement = () => {
         }}
         onAssign={handleAssignDriver}
         orderId={selectedOrder?.id}
+      />
+
+      <OrderDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false)
+          setSelectedOrder(null)
+        }}
+        order={selectedOrder}
       />
     </div>
   )

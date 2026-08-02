@@ -1,3 +1,4 @@
+// CreateOrder.jsx - Fixed version
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOrders } from '../../hooks/useOrders'
@@ -19,7 +20,6 @@ const CreateOrder = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(VEHICLE_TYPES.SEDAN)
   const [priceBreakdown, setPriceBreakdown] = useState(null)
 
-  // Fetch active pricing on mount
   useEffect(() => {
     const fetchPricing = async () => {
       try {
@@ -28,7 +28,6 @@ const CreateOrder = () => {
           setVehicleOptions(configs)
           setSelectedVehicle(configs[0].vehicleType)
         } else {
-          // Fallback to all enum values
           setVehicleOptions(
             Object.keys(VEHICLE_TYPES).map((key) => ({
               vehicleType: VEHICLE_TYPES[key],
@@ -38,7 +37,6 @@ const CreateOrder = () => {
         }
       } catch (err) {
         console.error('Failed to load pricing', err)
-        // Fallback to all enum values
         setVehicleOptions(
           Object.keys(VEHICLE_TYPES).map((key) => ({
             vehicleType: VEHICLE_TYPES[key],
@@ -49,19 +47,6 @@ const CreateOrder = () => {
     }
     fetchPricing()
   }, [])
-
-  const handleAddressBlur = async (field, value) => {
-    if (value && value.length > 3) {
-      try {
-        const isValid = await distanceService.validateAddress(value)
-        if (!isValid) {
-          toast.error(`Invalid ${field} address. Please check and try again.`)
-        }
-      } catch (err) {
-        console.error('Address validation failed', err)
-      }
-    }
-  }
 
   const handleAddressChange = (pickup, delivery) => {
     if (pickup && delivery) {
@@ -74,7 +59,6 @@ const CreateOrder = () => {
     }
   }
 
-  // Recalculate price when distance or vehicle changes
   useEffect(() => {
     if (distance && selectedVehicle) {
       pricingService
@@ -86,7 +70,6 @@ const CreateOrder = () => {
         .catch((err) => {
           console.warn('Price calculation failed:', err)
           setPriceBreakdown(null)
-          // Show a gentle warning but don't block user
           if (err.response?.status === 404) {
             toast.error('No pricing configuration found for this vehicle. Please contact admin.')
           }
@@ -107,15 +90,17 @@ const CreateOrder = () => {
         weight: parseFloat(data.weight) || 0,
         volume: parseFloat(data.volume) || 0,
         vehicleType: data.vehicleType || selectedVehicle,
-        pickupDate,
+        pickupDate: pickupDate,
         expressDelivery: data.expressDelivery === true || data.expressDelivery === 'true',
       }
 
+      console.log('Creating order with data:', orderData)
+
       const order = await createOrder(orderData)
       if (order && order.id) {
+        toast.success('Order created successfully!')
         navigate(`/client/order-tracking/${order.id}`)
       } else {
-        // This should not happen if createOrder throws on error
         toast.error('Order created but no ID returned')
       }
     } catch (error) {
@@ -136,6 +121,7 @@ const CreateOrder = () => {
             vehicleOptions={vehicleOptions}
             selectedVehicle={selectedVehicle}
             onVehicleChange={setSelectedVehicle}
+            onAddressChange={handleAddressChange}
           />
         </div>
         <div className="lg:col-span-1">

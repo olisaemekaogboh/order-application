@@ -1,3 +1,4 @@
+// features/orders/services/orderService.js
 import axiosInstance from '@/shared/utils/helpers/axiosConfig'
 
 export const orderService = {
@@ -27,8 +28,8 @@ export const orderService = {
   },
 
   cancelOrder: async (orderId, reason) => {
-    const response = await axiosInstance.put(`/orders/${orderId}/cancel`, null, {
-      params: { reason },
+    const response = await axiosInstance.put(`/orders/${orderId}/cancel`, {
+      cancellationReason: reason,
     })
     return response.data.data
   },
@@ -48,7 +49,6 @@ export const orderService = {
     return response.data.data
   },
 
-  // FIXED ENDPOINTS
   getOrderCount: async () => {
     const response = await axiosInstance.get('/orders/count')
     return response.data.data
