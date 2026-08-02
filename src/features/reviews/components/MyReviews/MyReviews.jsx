@@ -1,3 +1,4 @@
+// MyReviews.jsx
 import React, { useEffect, useState } from 'react'
 import { useReviews } from '../../hooks/useReviews'
 import ReviewList from '../ReviewList/ReviewList'
@@ -6,6 +7,7 @@ import Button from '@/shared/components/ui/Button/Button'
 import Modal from '@/shared/components/ui/Modal/Modal'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
+import toast from 'react-hot-toast'
 
 const MyReviews = () => {
   const {
@@ -31,22 +33,37 @@ const MyReviews = () => {
   }
 
   const handleUpdate = async (data) => {
-    await updateReview(editingReview.id, data)
-    setEditingReview(null)
-    fetchMyReviews()
+    try {
+      await updateReview(editingReview.id, data)
+      setEditingReview(null)
+      await fetchMyReviews()
+      toast.success('Review updated successfully')
+    } catch (error) {
+      toast.error('Failed to update review')
+    }
   }
 
   const handleDelete = async (id) => {
     if (window.confirm('Delete this review?')) {
-      await deleteReview(id)
-      fetchMyReviews()
+      try {
+        await deleteReview(id)
+        await fetchMyReviews()
+        toast.success('Review deleted')
+      } catch (error) {
+        toast.error('Failed to delete review')
+      }
     }
   }
 
   const handleCreate = async (data) => {
-    await createReview(data)
-    setShowCreateModal(false)
-    fetchMyReviews()
+    try {
+      await createReview(data)
+      setShowCreateModal(false)
+      await fetchMyReviews()
+      toast.success('Review submitted successfully')
+    } catch (error) {
+      toast.error('Failed to submit review')
+    }
   }
 
   if (loading && reviews.length === 0) {
@@ -85,11 +102,7 @@ const MyReviews = () => {
       <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)}>
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">Write a Review</h2>
-          <ReviewForm
-            onSubmit={handleCreate}
-            loading={loading}
-            // Pass orderId and driverId as needed – you may want to let user select
-          />
+          <ReviewForm onSubmit={handleCreate} loading={loading} />
         </div>
       </Modal>
 

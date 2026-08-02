@@ -10,7 +10,6 @@ import {
   NOTIFICATION_PRIORITIES_COLORS,
 } from '../constants'
 
-// ===== Type & Priority Helpers =====
 export const getNotificationTypeLabel = (type) => {
   return NOTIFICATION_TYPES_LABELS[type] || type
 }
@@ -27,7 +26,6 @@ export const getNotificationPriorityColor = (priority) => {
   return NOTIFICATION_PRIORITIES_COLORS[priority] || 'bg-gray-100 text-gray-800'
 }
 
-// ===== Time Helpers =====
 export const formatNotificationTime = (timestamp) => {
   if (!timestamp) return 'N/A'
   const date = new Date(timestamp)
@@ -45,7 +43,6 @@ export const formatNotificationTime = (timestamp) => {
   })
 }
 
-// ===== Grouping Helpers =====
 export const groupNotificationsByDate = (notifications) => {
   if (!notifications || !Array.isArray(notifications)) return {}
   const groups = {}
@@ -57,7 +54,6 @@ export const groupNotificationsByDate = (notifications) => {
   return groups
 }
 
-// ===== Filter Helpers =====
 export const filterNotificationsByType = (notifications, type) => {
   if (!type) return notifications
   return notifications.filter((n) => n.type === type)
@@ -68,17 +64,14 @@ export const filterNotificationsByPriority = (notifications, priority) => {
   return notifications.filter((n) => n.priority === priority)
 }
 
-// ===== Mark/Unmark =====
 export const markAllNotificationsRead = (notifications) => {
   return notifications.map((n) => ({ ...n, read: true }))
 }
 
-// ===== Count Helpers =====
 export const countUnread = (notifications) => {
   return notifications.filter((n) => !n.read).length
 }
 
-// ===== Sort Helpers =====
 export const sortNotificationsByDate = (notifications, order = 'desc') => {
   if (!notifications || !Array.isArray(notifications)) return []
   const sorted = [...notifications].sort((a, b) => {

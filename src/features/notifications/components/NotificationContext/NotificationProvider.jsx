@@ -4,6 +4,7 @@ import { notificationService } from '../../services/notificationService'
 import { useSocket } from '@/shared/hooks/useSocket'
 import { SOCKET_EVENTS } from '@/shared/services/websocket/socketEvents'
 import { useAuth } from '../../../auth/hooks/useAuth'
+import toast from 'react-hot-toast'
 
 export const NotificationProvider = ({ children }) => {
   const { isAuthenticated } = useAuth()
@@ -42,12 +43,19 @@ export const NotificationProvider = ({ children }) => {
     }
   }
 
-  // WebSocket listener only if authenticated
   useSocket(SOCKET_EVENTS.NOTIFICATIONS, (notification) => {
     if (notification && isAuthenticated) {
       setNotifications((prev) => [notification, ...prev])
       if (!notification.read) {
         setUnreadCount((c) => c + 1)
+
+        if (notification.type === 'REVIEW_APPROVED') {
+          toast.success('✅ Your review was approved!')
+        } else if (notification.type === 'REVIEW_REJECTED') {
+          toast.error('❌ Your review was rejected')
+        } else if (notification.type === 'REVIEW_REPORTED') {
+          toast.error('🚨 Your review was flagged')
+        }
       }
     }
   })

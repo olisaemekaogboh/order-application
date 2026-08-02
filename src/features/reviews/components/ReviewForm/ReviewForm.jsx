@@ -1,57 +1,44 @@
+// ReviewForm.jsx
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { useForm } from 'react-hook-form'
-import { validateReview } from '../../validations'
 import Button from '@/shared/components/ui/Button/Button'
-import Input from '@/shared/components/ui/Input/Input'
 import Textarea from '@/shared/components/ui/Textarea/Textarea'
-import { MAX_RATING, MIN_RATING } from '../../constants'
+import { MAX_RATING } from '../../constants'
 
-const ReviewForm = ({ initialData, onSubmit, loading, orderId, driverId }) => {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      rating: initialData?.rating || 3,
-      comment: initialData?.comment || '',
-      orderId: orderId || initialData?.orderId || '',
-      driverId: driverId || initialData?.driverId || '',
-    },
-  })
+const ReviewForm = ({ initialData, onSubmit, loading }) => {
+  const [rating, setRating] = useState(initialData?.rating || 0)
+  const [comment, setComment] = useState(initialData?.comment || '')
+  const [hoverRating, setHoverRating] = useState(0)
 
-  const rating = watch('rating')
-
-  const handleRatingChange = (value) => {
-    setValue('rating', value, { shouldValidate: true })
-  }
-
-  const onSubmitForm = async (data) => {
-    const validationErrors = validateReview(data)
-    if (Object.keys(validationErrors).length > 0) {
-      // Set errors manually if needed
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (rating === 0) {
+      alert('Please select a rating')
       return
     }
-    await onSubmit(data)
+    onSubmit({ rating, comment })
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Rating</label>
-        <div className="flex gap-1 mt-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Rating *
+        </label>
+        <div className="flex gap-1">
           {[...Array(MAX_RATING)].map((_, i) => {
             const value = i + 1
             return (
               <button
                 key={value}
                 type="button"
-                onClick={() => handleRatingChange(value)}
+                onClick={() => setRating(value)}
+                onMouseEnter={() => setHoverRating(value)}
+                onMouseLeave={() => setHoverRating(0)}
                 className={`text-3xl focus:outline-none transition ${
-                  value <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+                  value <= (hoverRating || rating)
+                    ? 'text-yellow-400'
+                    : 'text-gray-300 dark:text-gray-600'
                 }`}
                 aria-label={`Rate ${value}`}
               >
@@ -60,27 +47,25 @@ const ReviewForm = ({ initialData, onSubmit, loading, orderId, driverId }) => {
             )
           })}
           <span className="ml-2 text-sm text-gray-500">
-            ({rating} / {MAX_RATING})
+            {rating > 0 ? `${rating} / ${MAX_RATING}` : 'Select rating'}
           </span>
         </div>
-        {errors.rating && <p className="text-red-500 text-xs mt-1">{errors.rating.message}</p>}
       </div>
 
       <Textarea
         label="Comment (optional)"
-        {...register('comment')}
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
         rows={4}
         maxLength={500}
-        error={errors.comment?.message}
+        placeholder="Share your experience..."
         disabled={loading}
       />
-
-      <input type="hidden" {...register('orderId')} />
-      <input type="hidden" {...register('driverId')} />
+      <div className="text-xs text-gray-400 text-right">{comment.length}/500</div>
 
       <div className="flex justify-end gap-2">
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Submitting...' : 'Submit Review'}
+        <Button type="submit" disabled={loading || rating === 0}>
+          {loading ? 'Submitting...' : initialData ? 'Update Review' : 'Submit Review'}
         </Button>
       </div>
     </form>
@@ -91,8 +76,6 @@ ReviewForm.propTypes = {
   initialData: PropTypes.object,
   onSubmit: PropTypes.func.isRequired,
   loading: PropTypes.bool,
-  orderId: PropTypes.string,
-  driverId: PropTypes.string,
 }
 
 export default ReviewForm

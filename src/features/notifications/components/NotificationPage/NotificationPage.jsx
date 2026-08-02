@@ -1,4 +1,3 @@
-// features/notifications/components/NotificationPage/NotificationPage.jsx
 import React, { useState, useEffect } from 'react'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useAuth } from '../../../auth/hooks/useAuth'
@@ -40,7 +39,6 @@ const NotificationPage = () => {
   const [selectAll, setSelectAll] = useState(false)
 
   useEffect(() => {
-    // Fetch notifications with current filter
     const params = filter !== 'all' ? { status: filter } : {}
     fetchNotifications(params)
   }, [fetchNotifications, filter, pagination.page])
@@ -96,6 +94,12 @@ const NotificationPage = () => {
       REMINDER: '⏰',
       DRIVER_ASSIGNED: '👤',
       DELIVERY_CONFIRMED: '✅',
+      REVIEW_APPROVED: '✅',
+      REVIEW_REJECTED: '❌',
+      REVIEW_REPORTED: '🚨',
+      REVIEW_CREATED: '✍️',
+      REVIEW_UPDATED: '📝',
+      REVIEW_DELETED: '🗑️',
     }
     return icons[type] || '🔔'
   }
@@ -156,7 +160,6 @@ const NotificationPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -179,7 +182,6 @@ const NotificationPage = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Broadcast Button - Only for Admins */}
           {isAdmin && <AdminNotificationBroadcast />}
 
           {selectedIds.length > 0 && (
@@ -241,7 +243,6 @@ const NotificationPage = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="mb-6">
         <Tabs
           tabs={tabs.map((tab) => ({ ...tab, content: null }))}
@@ -250,7 +251,6 @@ const NotificationPage = () => {
         />
       </div>
 
-      {/* Notification List */}
       {notifications.length === 0 ? (
         <EmptyState
           icon="🔔"
@@ -273,7 +273,6 @@ const NotificationPage = () => {
       ) : (
         <>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-            {/* Select All */}
             <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4">
               <input
                 type="checkbox"
@@ -296,7 +295,7 @@ const NotificationPage = () => {
               </span>
             </div>
 
-            <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+            <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-[600px] overflow-y-auto">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
@@ -376,7 +375,6 @@ const NotificationPage = () => {
             </div>
           </div>
 
-          {/* Pagination */}
           {pagination.totalPages > 1 && (
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
               <div className="text-sm text-gray-500 dark:text-gray-400">

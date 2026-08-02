@@ -1,13 +1,19 @@
+// useReviews.js
 import { useState, useCallback } from 'react'
 import { reviewService } from '../services/reviewService'
-import { toast } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 export const useReviews = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [reviews, setReviews] = useState([])
   const [currentReview, setCurrentReview] = useState(null)
-  const [pagination, setPagination] = useState({ page: 0, size: 10, total: 0 })
+  const [pagination, setPagination] = useState({
+    page: 0,
+    size: 10,
+    total: 0,
+    totalPages: 0,
+  })
 
   // ----- Fetch my reviews -----
   const fetchMyReviews = useCallback(
@@ -20,11 +26,14 @@ export const useReviews = () => {
           size: pagination.size,
           ...params,
         })
+        console.log('My reviews response:', response) // Debug log
+
         setReviews(response.content || [])
         setPagination({
           page: response.page || 0,
           size: response.size || 10,
           total: response.total || 0,
+          totalPages: response.totalPages || 0,
         })
         return response
       } catch (err) {
@@ -50,6 +59,7 @@ export const useReviews = () => {
         page: response.page || 0,
         size: response.size || 10,
         total: response.total || 0,
+        totalPages: response.totalPages || 0,
       })
       return response
     } catch (err) {

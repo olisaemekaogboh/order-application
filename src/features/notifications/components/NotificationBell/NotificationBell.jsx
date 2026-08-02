@@ -22,16 +22,13 @@ export const NotificationBell = () => {
     isConnected,
   } = useNotifications()
 
-  // Fetch notifications on mount and when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchUnreadCount()
-      // Fetch the latest 5 notifications for the dropdown
       fetchNotifications({ page: 0, size: 5 })
     }
   }, [isAuthenticated])
 
-  // Refresh when bell is opened
   useEffect(() => {
     if (isOpen && isAuthenticated) {
       fetchUnreadCount()
@@ -49,6 +46,8 @@ export const NotificationBell = () => {
     }
     if (notification.actionUrl) {
       navigate(notification.actionUrl)
+    } else if (notification.type?.startsWith('REVIEW_')) {
+      navigate('/admin/reviews')
     } else {
       navigate(NOTIFICATION_ROUTES.LIST)
     }
@@ -62,17 +61,35 @@ export const NotificationBell = () => {
 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead()
-    // Refresh after marking all as read
     fetchUnreadCount()
     fetchNotifications({ page: 0, size: 5 })
   }
 
-  // Don't render if not authenticated
   if (!isAuthenticated) {
     return null
   }
 
   const recentNotifications = notifications.slice(0, 5)
+
+  const getNotificationIcon = (type) => {
+    const icons = {
+      ORDER_UPDATE: '📦',
+      PAYMENT: '💳',
+      SYSTEM: '⚙️',
+      PROMOTION: '🎉',
+      ALERT: '⚠️',
+      REMINDER: '⏰',
+      DRIVER_ASSIGNED: '👤',
+      DELIVERY_CONFIRMED: '✅',
+      REVIEW_APPROVED: '✅',
+      REVIEW_REJECTED: '❌',
+      REVIEW_REPORTED: '🚨',
+      REVIEW_CREATED: '✍️',
+      REVIEW_UPDATED: '📝',
+      REVIEW_DELETED: '🗑️',
+    }
+    return icons[type] || '🔔'
+  }
 
   return (
     <div className="relative">
@@ -112,7 +129,7 @@ export const NotificationBell = () => {
               </div>
             ) : recentNotifications.length === 0 ? (
               <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                {unreadCount > 0 ? 'Loading notifications...' : 'No notifications'}
+                No notifications
               </div>
             ) : (
               recentNotifications.map((notification) => (
@@ -125,14 +142,7 @@ export const NotificationBell = () => {
                 >
                   <div className="flex gap-3">
                     <div className="flex-shrink-0 text-lg">
-                      {notification.type === 'ORDER_UPDATE' && '📦'}
-                      {notification.type === 'PAYMENT' && '💳'}
-                      {notification.type === 'SYSTEM' && '⚙️'}
-                      {notification.type === 'PROMOTION' && '🎉'}
-                      {notification.type === 'ALERT' && '⚠️'}
-                      {notification.type === 'REMINDER' && '⏰'}
-                      {notification.type === 'DRIVER_ASSIGNED' && '👤'}
-                      {notification.type === 'DELIVERY_CONFIRMED' && '✅'}
+                      {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">

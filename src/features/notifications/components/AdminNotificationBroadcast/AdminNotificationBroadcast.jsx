@@ -1,4 +1,3 @@
-// features/notifications/components/AdminNotificationBroadcast/AdminNotificationBroadcast.jsx
 import React, { useState } from 'react'
 import { Send, Users, AlertCircle, X } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -56,7 +55,6 @@ const AdminNotificationBroadcast = () => {
 
     setLoading(true)
     try {
-      // Prepare payload - recipientRole null means all users
       const payload = {
         title: formData.title.trim(),
         message: formData.message.trim(),
@@ -72,7 +70,6 @@ const AdminNotificationBroadcast = () => {
 
       toast.success(`Broadcast sent successfully to ${roleLabel}`)
 
-      // Reset form
       setFormData({
         title: '',
         message: '',

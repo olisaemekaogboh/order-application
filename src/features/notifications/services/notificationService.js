@@ -1,4 +1,3 @@
-// features/notifications/services/notificationService.js
 import axiosInstance from '@/shared/utils/helpers/axiosConfig'
 
 export const notificationService = {
@@ -42,7 +41,6 @@ export const notificationService = {
     return response.data.data
   },
 
-  // Broadcast notification to multiple users
   broadcastNotification: async (data) => {
     const response = await axiosInstance.post('/notifications/broadcast', data)
     return response.data
@@ -53,3 +51,5 @@ export const notificationService = {
     return response.data.data
   },
 }
+
+export default notificationService

@@ -1,4 +1,3 @@
-// features/notifications/index.js
 /**
  * Notifications Feature Index
  * Main entry point for the notifications feature

@@ -17,24 +17,20 @@ export const useNotifications = () => {
     totalPages: 0,
   })
 
-  // ===== WebSocket listener for real-time notifications =====
   const { isConnected } = useSocket(WS_NOTIFICATION_EVENTS.NOTIFICATION, (data) => {
     if (data) {
       addNotification(data)
     }
   })
 
-  // ===== Fetch Notifications =====
   const fetchNotifications = useCallback(
     async (params = {}) => {
       setLoading(true)
       setError(null)
       try {
-        // Use provided params or fallback to state
         const page = params.page !== undefined ? params.page : pagination.page
         const size = params.size !== undefined ? params.size : pagination.size
 
-        // Remove pagination params from the filter params to avoid duplication
         const { page: _, size: __, ...filterParams } = params
 
         const response = await notificationService.getNotifications({
@@ -42,8 +38,6 @@ export const useNotifications = () => {
           size,
           ...filterParams,
         })
-
-        console.log('📬 Notifications fetched:', response) // Debug log
 
         setNotifications(response.content || [])
         setPagination({
@@ -53,7 +47,6 @@ export const useNotifications = () => {
           totalPages: response.totalPages || 0,
         })
 
-        // Update unread count from the response
         const unread = (response.content || []).filter((n) => !n.read).length
         setUnreadCount(unread)
 
@@ -71,7 +64,6 @@ export const useNotifications = () => {
     [pagination.page, pagination.size]
   )
 
-  // ===== Fetch Unread Count =====
   const fetchUnreadCount = useCallback(async () => {
     try {
       const count = await notificationService.getUnreadCount()
@@ -83,7 +75,6 @@ export const useNotifications = () => {
     }
   }, [])
 
-  // ===== Mark Notification as Read =====
   const markAsRead = useCallback(async (id) => {
     try {
       await notificationService.markAsRead(id)
@@ -97,7 +88,6 @@ export const useNotifications = () => {
     }
   }, [])
 
-  // ===== Mark Selected as Read =====
   const markSelectedAsRead = useCallback(async (ids) => {
     try {
       for (const id of ids) {
@@ -113,7 +103,6 @@ export const useNotifications = () => {
     }
   }, [])
 
-  // ===== Mark All as Read =====
   const markAllAsRead = useCallback(async () => {
     try {
       await notificationService.markAllAsRead()
@@ -127,7 +116,6 @@ export const useNotifications = () => {
     }
   }, [])
 
-  // ===== Delete Notification =====
   const deleteNotification = useCallback(
     async (id) => {
       try {
@@ -147,7 +135,6 @@ export const useNotifications = () => {
     [notifications]
   )
 
-  // ===== Delete Selected =====
   const deleteSelected = useCallback(
     async (ids) => {
       try {
@@ -167,7 +154,6 @@ export const useNotifications = () => {
     [notifications]
   )
 
-  // ===== Delete All Notifications =====
   const deleteAllNotifications = useCallback(async () => {
     try {
       await notificationService.deleteAllNotifications()
@@ -181,7 +167,6 @@ export const useNotifications = () => {
     }
   }, [])
 
-  // ===== Add a new notification (used by WebSocket) =====
   const addNotification = useCallback((notification) => {
     setNotifications((prev) => [notification, ...prev])
     if (!notification.read) {
@@ -189,7 +174,6 @@ export const useNotifications = () => {
     }
   }, [])
 
-  // ===== Change Page =====
   const changePage = useCallback((page) => {
     setPagination((prev) => ({ ...prev, page }))
   }, [])
@@ -198,7 +182,6 @@ export const useNotifications = () => {
     setPagination((prev) => ({ ...prev, size, page: 0 }))
   }, [])
 
-  // ===== Reset =====
   const reset = useCallback(() => {
     setNotifications([])
     setUnreadCount(0)
@@ -212,7 +195,6 @@ export const useNotifications = () => {
   }, [])
 
   return {
-    // State
     loading,
     error,
     notifications,
@@ -221,7 +203,6 @@ export const useNotifications = () => {
     filter,
     isConnected,
 
-    // Actions
     setFilter,
     fetchNotifications,
     fetchUnreadCount,

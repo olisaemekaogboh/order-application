@@ -1,7 +1,6 @@
 import axiosInstance from '@/shared/utils/helpers/axiosConfig'
 
 export const reviewService = {
-  // ----- CRUD -----
   createReview: async (data) => {
     const response = await axiosInstance.post('/reviews', data)
     return response.data.data
@@ -22,7 +21,6 @@ export const reviewService = {
     return response.data.data
   },
 
-  // ----- Listing -----
   getReviewsByDriver: async (driverId, params = {}) => {
     const response = await axiosInstance.get(`/reviews/driver/${driverId}`, { params })
     return response.data.data
@@ -38,18 +36,44 @@ export const reviewService = {
     return response.data.data
   },
 
-  // ----- Moderation (admin) & Reporting -----
-  reportReview: async (reviewId, data) => {
-    const response = await axiosInstance.post(`/reviews/${reviewId}/report`, data)
-    return response.data.data
-  },
-  // In src/features/reviews/services/reviewService.js
   getAllReviews: async (params = {}) => {
-    const response = await axiosInstance.get('/reviews', { params })
-    return response.data.data
+    const cleanParams = {}
+
+    if (params.page !== undefined) cleanParams.page = params.page
+    if (params.size !== undefined) cleanParams.size = params.size
+    if (params.sortBy) cleanParams.sortBy = params.sortBy
+    if (params.sortDirection) cleanParams.sortDirection = params.sortDirection
+
+    const validStatuses = ['ACTIVE', 'EDITED', 'DELETED', 'HIDDEN']
+    if (params.status && validStatuses.includes(params.status)) {
+      cleanParams.status = params.status
+    }
+
+    const validModerationStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'FLAGGED']
+    if (params.moderationStatus && validModerationStatuses.includes(params.moderationStatus)) {
+      cleanParams.moderationStatus = params.moderationStatus
+    }
+
+    try {
+      const response = await axiosInstance.get('/reviews', { params: cleanParams })
+      let data = response.data
+      if (data.data) {
+        return data.data
+      }
+      return data
+    } catch (error) {
+      console.error('Error in getAllReviews:', error)
+      throw error
+    }
   },
+
   moderateReview: async (reviewId, data) => {
     const response = await axiosInstance.put(`/reviews/${reviewId}/moderate`, data)
+    return response.data.data
+  },
+
+  reportReview: async (reviewId, data) => {
+    const response = await axiosInstance.post(`/reviews/${reviewId}/report`, data)
     return response.data.data
   },
 }

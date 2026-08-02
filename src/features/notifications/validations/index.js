@@ -3,7 +3,6 @@
  * Validation functions for notification operations
  */
 
-// ===== Notification Type Validation =====
 export const validateNotificationType = (type) => {
   const validTypes = [
     'ORDER_UPDATE',
@@ -14,21 +13,25 @@ export const validateNotificationType = (type) => {
     'ALERT',
     'DRIVER_ASSIGNED',
     'DELIVERY_CONFIRMED',
+    'REVIEW_APPROVED',
+    'REVIEW_REJECTED',
+    'REVIEW_REPORTED',
+    'REVIEW_CREATED',
+    'REVIEW_UPDATED',
+    'REVIEW_DELETED',
   ]
   if (!type) return 'Notification type is required'
   if (!validTypes.includes(type)) return 'Invalid notification type'
   return null
 }
 
-// ===== Notification Priority Validation =====
 export const validateNotificationPriority = (priority) => {
   const validPriorities = ['LOW', 'NORMAL', 'HIGH', 'URGENT']
-  if (!priority) return null // optional
+  if (!priority) return null
   if (!validPriorities.includes(priority)) return 'Invalid priority'
   return null
 }
 
-// ===== Notification Message Validation =====
 export const validateNotificationMessage = (message) => {
   if (!message) return 'Message is required'
   if (message.trim().length < 2) return 'Message must be at least 2 characters'
@@ -36,7 +39,6 @@ export const validateNotificationMessage = (message) => {
   return null
 }
 
-// ===== Notification Title Validation =====
 export const validateNotificationTitle = (title) => {
   if (!title) return 'Title is required'
   if (title.trim().length < 2) return 'Title must be at least 2 characters'
@@ -44,7 +46,6 @@ export const validateNotificationTitle = (title) => {
   return null
 }
 
-// ===== Notification Filter Validation =====
 export const validateNotificationFilters = (filters) => {
   const errors = {}
 
