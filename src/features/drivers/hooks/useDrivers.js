@@ -16,13 +16,13 @@ export const useDrivers = () => {
     totalPages: 0,
   })
 
-  // ===== Fetch All Drivers =====
+  // ===== Admin: Fetch All Drivers =====
   const fetchDrivers = useCallback(
     async (params = {}) => {
       setLoading(true)
       setError(null)
       try {
-        const response = await driverService.getAllDrivers({
+        const response = await driverService.getAllDriversAdmin({
           page: pagination.page,
           size: pagination.size,
           sortBy: DRIVER_DEFAULTS.SORT_BY,
@@ -49,7 +49,7 @@ export const useDrivers = () => {
     [pagination.page, pagination.size]
   )
 
-  // ===== Fetch Available Drivers =====
+  // ===== Public: Fetch Available Drivers =====
   const fetchAvailableDrivers = useCallback(async (params = {}) => {
     setLoading(true)
     try {
@@ -64,12 +64,12 @@ export const useDrivers = () => {
     }
   }, [])
 
-  // ===== Get Driver by ID =====
+  // ===== Admin: Get Driver by ID =====
   const getDriver = useCallback(async (id) => {
     setLoading(true)
     setError(null)
     try {
-      const driver = await driverService.getDriverById(id)
+      const driver = await driverService.getDriverByIdAdmin(id)
       setCurrentDriver(driver)
       return driver
     } catch (err) {
@@ -82,12 +82,13 @@ export const useDrivers = () => {
     }
   }, [])
 
-  // ===== Register Driver =====
+  // ===== Admin: Register Driver =====
   const registerDriver = useCallback(async (data) => {
     setLoading(true)
     setError(null)
     try {
-      const driver = await driverService.registerDriver(data)
+      // ✅ Use admin endpoint for registration
+      const driver = await driverService.registerDriverAdmin(data)
       setDrivers((prev) => [driver, ...prev])
       toast.success('Driver registered successfully')
       return driver
@@ -101,13 +102,13 @@ export const useDrivers = () => {
     }
   }, [])
 
-  // ===== Update Driver =====
+  // ===== Admin: Update Driver =====
   const updateDriver = useCallback(
     async (id, data) => {
       setLoading(true)
       setError(null)
       try {
-        const driver = await driverService.updateDriver(id, data)
+        const driver = await driverService.updateDriverAdmin(id, data)
         setDrivers((prev) => prev.map((d) => (d.id === id ? driver : d)))
         if (currentDriver?.id === id) {
           setCurrentDriver(driver)
@@ -126,12 +127,12 @@ export const useDrivers = () => {
     [currentDriver]
   )
 
-  // ===== Delete Driver =====
+  // ===== Admin: Delete Driver =====
   const deleteDriver = useCallback(
     async (id) => {
       setLoading(true)
       try {
-        await driverService.deleteDriver(id)
+        await driverService.deleteDriverAdmin(id)
         setDrivers((prev) => prev.filter((d) => d.id !== id))
         if (currentDriver?.id === id) {
           setCurrentDriver(null)
@@ -148,12 +149,12 @@ export const useDrivers = () => {
     [currentDriver]
   )
 
-  // ===== Update Availability =====
+  // ===== Admin: Update Availability =====
   const updateAvailability = useCallback(
     async (id, available) => {
       setLoading(true)
       try {
-        await driverService.updateAvailability(id, available)
+        await driverService.updateDriverAvailabilityAdmin(id, available)
         setDrivers((prev) => prev.map((d) => (d.id === id ? { ...d, available } : d)))
         if (currentDriver?.id === id) {
           setCurrentDriver((prev) => ({ ...prev, available }))
@@ -170,12 +171,12 @@ export const useDrivers = () => {
     [currentDriver]
   )
 
-  // ===== Update Location =====
+  // ===== Public/Driver: Update Location =====
   const updateLocation = useCallback(
     async (id, latitude, longitude, location) => {
       setLoading(true)
       try {
-        await driverService.updateLocation(id, latitude, longitude, location)
+        await driverService.updateMyLocation(latitude, longitude, location)
         const updated = {
           currentLatitude: latitude,
           currentLongitude: longitude,
@@ -197,11 +198,11 @@ export const useDrivers = () => {
     [currentDriver]
   )
 
-  // ===== Get Driver Earnings =====
+  // ===== Admin: Get Driver Earnings =====
   const getDriverEarnings = useCallback(async (id) => {
     setLoading(true)
     try {
-      const data = await driverService.getDriverEarnings(id)
+      const data = await driverService.getDriverEarningsAdmin(id)
       setEarnings(data)
       return data
     } catch (err) {
@@ -213,11 +214,11 @@ export const useDrivers = () => {
     }
   }, [])
 
-  // ===== Get Driver Earnings (Paginated) =====
+  // ===== Admin: Get Driver Earnings (Paginated) =====
   const getDriverEarningsPaginated = useCallback(async (id, page = 0, size = 10) => {
     setLoading(true)
     try {
-      const response = await driverService.getDriverEarningsPaginated(id, page, size)
+      const response = await driverService.getDriverEarningsPaginatedAdmin(id, page, size)
       setEarnings(response.content || [])
       setPagination({
         page: response.page || 0,
@@ -235,10 +236,10 @@ export const useDrivers = () => {
     }
   }, [])
 
-  // ===== Get Total Earnings =====
+  // ===== Admin: Get Total Earnings =====
   const getTotalEarnings = useCallback(async (id) => {
     try {
-      const total = await driverService.getTotalEarnings(id)
+      const total = await driverService.getTotalEarningsAdmin(id)
       return total
     } catch (err) {
       const message = err.response?.data?.message || 'Failed to fetch total earnings'
@@ -247,10 +248,10 @@ export const useDrivers = () => {
     }
   }, [])
 
-  // ===== Get Unpaid Earnings =====
+  // ===== Admin: Get Unpaid Earnings =====
   const getUnpaidEarnings = useCallback(async (id) => {
     try {
-      const unpaid = await driverService.getUnpaidEarnings(id)
+      const unpaid = await driverService.getUnpaidEarningsAdmin(id)
       return unpaid
     } catch (err) {
       const message = err.response?.data?.message || 'Failed to fetch unpaid earnings'
@@ -259,12 +260,12 @@ export const useDrivers = () => {
     }
   }, [])
 
-  // ===== Process Payment =====
+  // ===== Admin: Process Payment =====
   const processPayment = useCallback(
     async (id, amount) => {
       setLoading(true)
       try {
-        await driverService.processPayment(id, amount)
+        await driverService.processDriverPaymentAdmin(id, amount)
         // Refresh earnings after payment
         await getDriverEarnings(id)
         toast.success('Payment processed successfully')
@@ -279,7 +280,7 @@ export const useDrivers = () => {
     [getDriverEarnings]
   )
 
-  // ===== Change Page =====
+  // ===== Pagination =====
   const changePage = useCallback((page) => {
     setPagination((prev) => ({ ...prev, page }))
   }, [])

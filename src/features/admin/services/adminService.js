@@ -23,7 +23,6 @@ export const adminService = {
     return response.data.data
   },
 
-  // FIXED: Uses the correct PUT endpoint with request body
   updateUserStatus: async (userId, data) => {
     const response = await axiosInstance.put(`/admin/users/${userId}/status`, data)
     return response.data.data
@@ -35,6 +34,7 @@ export const adminService = {
   },
 
   // ===== Pricing Configuration =====
+  // FIXED: All endpoints now use /admin/pricing to match backend
   getPricingConfigs: async () => {
     const response = await axiosInstance.get('/admin/pricing')
     return response.data.data
@@ -87,7 +87,7 @@ export const adminService = {
     return response.data.data
   },
 
-  // ===== Dashboard Analytics (replaced methods) =====
+  // ===== Dashboard Analytics =====
   getRevenueAnalytics: async (data) => {
     const response = await axiosInstance.post('/admin/dashboard/revenue-analytics', data)
     return response.data.data
@@ -105,6 +105,54 @@ export const adminService = {
 
   getReviewAnalytics: async () => {
     const response = await axiosInstance.get('/admin/dashboard/reviews')
+    return response.data.data
+  },
+
+  // ===== Admin Tracking =====
+  getAllTracking: async (params) => {
+    const response = await axiosInstance.get('/admin/tracking', { params })
+    return response.data.data
+  },
+
+  // ===== Driver Payment =====
+  processDriverPayment: async (driverId, amount) => {
+    const response = await axiosInstance.post(`/admin/drivers/${driverId}/payments`, { amount })
+    return response.data.data
+  },
+  // In adminService.js, add these methods:
+
+  // ===== Dispatch Management =====
+  getDispatches: async (params) => {
+    const response = await axiosInstance.get('/admin/dispatches', { params })
+    return response.data.data
+  },
+
+  // ===== Fleet Analytics =====
+  getFleetAnalytics: async () => {
+    const response = await axiosInstance.get('/api/fleet/dashboard')
+    return response.data.data
+  },
+
+  // ===== Payment Management =====
+  getAllPayments: async (params) => {
+    const response = await axiosInstance.get('/admin/payments', { params })
+    return response.data.data
+  },
+
+  // ===== Review Management =====
+  getAllReviews: async (params) => {
+    const response = await axiosInstance.get('/admin/reviews', { params })
+    return response.data.data
+  },
+
+  moderateReview: async (id, data) => {
+    const response = await axiosInstance.put(`/admin/reviews/${id}/moderate`, data)
+    return response.data.data
+  },
+
+  // ===== Tracking Management =====
+  getAllTracking: async (params) => {
+    const response = await axiosInstance.get('/admin/tracking', { params })
     return response.data.data
   },
 }

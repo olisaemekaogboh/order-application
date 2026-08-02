@@ -94,13 +94,7 @@ const AdminDashboard = () => {
       onClick: () => navigate(ADMIN_ROUTES.ORDERS),
       color: 'bg-blue-600',
     },
-    {
-      id: 'driverAnalytics',
-      label: 'Driver Analytics',
-      icon: <Truck size={30} />,
-      onClick: () => navigate(ADMIN_ROUTES.DRIVER_ANALYTICS),
-      color: 'bg-green-600',
-    },
+
     {
       id: 'fleet',
       label: 'Fleet',

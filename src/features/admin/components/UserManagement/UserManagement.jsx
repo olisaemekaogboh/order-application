@@ -6,9 +6,24 @@ import Select from '@/shared/components/ui/Select/Select'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
 import { CUSTOMER_ROLES_LABELS } from '../../../customers/constants'
+import { useAuth } from '@/features/auth/hooks/useAuth' // Import auth hook
 
 const UserManagement = () => {
-  const { customers, loading, pagination, fetchCustomers, changePage } = useCustomers()
+  const {
+    customers,
+    loading,
+    pagination,
+    fetchCustomers,
+    changePage,
+    deleteCustomer,
+    enableCustomer,
+    disableCustomer,
+    suspendCustomer,
+    reactivateCustomer,
+  } = useCustomers()
+
+  const { user: currentUser } = useAuth() // Get current logged-in user
+
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
 
@@ -57,7 +72,16 @@ const UserManagement = () => {
         </div>
       </div>
 
-      <CustomerTable customers={customers} showActions />
+      <CustomerTable
+        customers={customers}
+        showActions
+        onDeleteUser={deleteCustomer}
+        onEnableUser={enableCustomer}
+        onDisableUser={disableCustomer}
+        onSuspendUser={suspendCustomer}
+        onReactivateUser={reactivateCustomer}
+        currentUserId={currentUser?.id} // Pass current user ID to prevent self-deletion
+      />
 
       {pagination.total > 0 && (
         <div className="mt-6 flex justify-between items-center">

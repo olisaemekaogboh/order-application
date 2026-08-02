@@ -1,6 +1,7 @@
 /**
  * Vehicles Constants
  * All vehicle-related constants in one place
+ * MUST match backend VehicleType enum
  */
 
 // ===== Vehicle Statuses =====
@@ -30,38 +31,54 @@ export const VEHICLE_STATUSES_COLORS = {
 }
 
 // ===== Vehicle Types =====
+// MUST match backend VehicleType enum values
 export const VEHICLE_TYPES = {
   MOTORCYCLE: 'MOTORCYCLE',
-  SEDAN: 'SEDAN',
-  SUV: 'SUV',
   VAN: 'VAN',
-  MINI_VAN: 'MINI_VAN',
+  SUV: 'SUV',
+  MINI_TRUCK: 'MINI_TRUCK',
+  TRICYCLE: 'TRICYCLE',
+  REFRIGERATED_TRUCK: 'REFRIGERATED_TRUCK',
   TRUCK: 'TRUCK',
   TRAILER: 'TRAILER',
-  BUS: 'BUS',
+  TANKER: 'TANKER',
+  PICKUP: 'PICKUP',
+  SEDAN: 'SEDAN',
 }
 
 export const VEHICLE_TYPES_LABELS = {
   [VEHICLE_TYPES.MOTORCYCLE]: 'Motorcycle',
-  [VEHICLE_TYPES.SEDAN]: 'Sedan',
-  [VEHICLE_TYPES.SUV]: 'SUV',
   [VEHICLE_TYPES.VAN]: 'Van',
-  [VEHICLE_TYPES.MINI_VAN]: 'Mini Van',
+  [VEHICLE_TYPES.SUV]: 'SUV',
+  [VEHICLE_TYPES.MINI_TRUCK]: 'Mini Truck',
+  [VEHICLE_TYPES.TRICYCLE]: 'Tricycle',
+  [VEHICLE_TYPES.REFRIGERATED_TRUCK]: 'Refrigerated Truck',
   [VEHICLE_TYPES.TRUCK]: 'Truck',
   [VEHICLE_TYPES.TRAILER]: 'Trailer',
-  [VEHICLE_TYPES.BUS]: 'Bus',
+  [VEHICLE_TYPES.TANKER]: 'Tanker',
+  [VEHICLE_TYPES.PICKUP]: 'Pickup',
+  [VEHICLE_TYPES.SEDAN]: 'Sedan',
 }
 
 export const VEHICLE_TYPES_ICONS = {
   [VEHICLE_TYPES.MOTORCYCLE]: '🏍️',
-  [VEHICLE_TYPES.SEDAN]: '🚗',
-  [VEHICLE_TYPES.SUV]: '🚙',
   [VEHICLE_TYPES.VAN]: '🚐',
-  [VEHICLE_TYPES.MINI_VAN]: '🚐',
+  [VEHICLE_TYPES.SUV]: '🚙',
+  [VEHICLE_TYPES.MINI_TRUCK]: '🚛',
+  [VEHICLE_TYPES.TRICYCLE]: '🛺',
+  [VEHICLE_TYPES.REFRIGERATED_TRUCK]: '🧊',
   [VEHICLE_TYPES.TRUCK]: '🚛',
   [VEHICLE_TYPES.TRAILER]: '🚛',
-  [VEHICLE_TYPES.BUS]: '🚌',
+  [VEHICLE_TYPES.TANKER]: '⛽',
+  [VEHICLE_TYPES.PICKUP]: '🛻',
+  [VEHICLE_TYPES.SEDAN]: '🚗',
 }
+
+// ===== Vehicle Options for Select Dropdowns =====
+export const VEHICLE_TYPE_OPTIONS = Object.entries(VEHICLE_TYPES_LABELS).map(([value, label]) => ({
+  value,
+  label,
+}))
 
 // ===== Vehicle Fuel Types =====
 export const FUEL_TYPES = {
@@ -103,6 +120,28 @@ export const MAINTENANCE_TYPES_LABELS = {
   [MAINTENANCE_TYPES.EMERGENCY]: 'Emergency Repair',
 }
 
+// ===== Maintenance Priority =====
+export const MAINTENANCE_PRIORITY = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT',
+}
+
+export const MAINTENANCE_PRIORITY_LABELS = {
+  [MAINTENANCE_PRIORITY.LOW]: 'Low',
+  [MAINTENANCE_PRIORITY.MEDIUM]: 'Medium',
+  [MAINTENANCE_PRIORITY.HIGH]: 'High',
+  [MAINTENANCE_PRIORITY.URGENT]: 'Urgent',
+}
+
+export const MAINTENANCE_PRIORITY_COLORS = {
+  [MAINTENANCE_PRIORITY.LOW]: 'bg-gray-100 text-gray-800',
+  [MAINTENANCE_PRIORITY.MEDIUM]: 'bg-yellow-100 text-yellow-800',
+  [MAINTENANCE_PRIORITY.HIGH]: 'bg-orange-100 text-orange-800',
+  [MAINTENANCE_PRIORITY.URGENT]: 'bg-red-100 text-red-800',
+}
+
 // ===== Vehicle Error Messages =====
 export const VEHICLE_ERRORS = {
   NOT_FOUND: 'Vehicle not found',
@@ -139,7 +178,7 @@ export const VEHICLE_API = {
   DELETE: '/vehicles/{id}',
   ASSIGN_DRIVER: '/vehicles/{id}/assign',
   UNASSIGN_DRIVER: '/vehicles/{id}/unassign',
-  UPDATE_STATUS: '/vehicles/{id}/status',
+  UPDATE_STATUS: '/api/vehicles/{id}/status', // ✅ Fixed - now uses /api prefix
   MAINTENANCE: '/vehicles/{id}/maintenance',
   GET_MAINTENANCE_HISTORY: '/vehicles/{id}/maintenance',
   GET_AVAILABLE: '/vehicles/available',

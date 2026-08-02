@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { reviewService } from '../../../reviews/services/reviewService'
+import { adminService } from '../../services/adminService'
 import Table from '@/shared/components/ui/Table/Table'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
 import EmptyState from '@/shared/components/ui/EmptyState/EmptyState'
 import Button from '@/shared/components/ui/Button/Button'
 import { REVIEW_STATUS_LABELS } from '../../../reviews/constants'
+import toast from 'react-hot-toast'
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState([])
@@ -15,7 +16,7 @@ const AdminReviews = () => {
   const fetchReviews = async () => {
     setLoading(true)
     try {
-      const response = await reviewService.getAllReviews({
+      const response = await adminService.getAllReviews({
         page: pagination.page,
         size: pagination.size,
       })
@@ -39,10 +40,12 @@ const AdminReviews = () => {
 
   const handleModerate = async (id, status) => {
     try {
-      await reviewService.moderateReview(id, { status })
+      await adminService.moderateReview(id, { status })
+      toast.success(`Review ${status.toLowerCase()}`)
       fetchReviews()
     } catch (error) {
       console.error('Moderation failed', error)
+      toast.error('Failed to moderate review')
     }
   }
 
@@ -72,12 +75,13 @@ const AdminReviews = () => {
     },
   ]
 
-  if (loading && reviews.length === 0)
+  if (loading && reviews.length === 0) {
     return (
       <div className="flex justify-center py-12">
         <Spinner size="lg" />
       </div>
     )
+  }
 
   return (
     <div>
@@ -85,13 +89,15 @@ const AdminReviews = () => {
       {reviews.length === 0 ? (
         <EmptyState icon="📝" title="No reviews found" />
       ) : (
-        <Table data={reviews} columns={columns} />
+        <>
+          <Table data={reviews} columns={columns} />
+          <Pagination
+            currentPage={pagination.page + 1}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => setPagination((prev) => ({ ...prev, page: page - 1 }))}
+          />
+        </>
       )}
-      <Pagination
-        currentPage={pagination.page + 1}
-        totalPages={pagination.totalPages}
-        onPageChange={(page) => setPagination((prev) => ({ ...prev, page: page - 1 }))}
-      />
     </div>
   )
 }

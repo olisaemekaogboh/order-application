@@ -107,9 +107,8 @@ export const unassignVehicle = async (id) => {
  * @returns {Promise} Updated vehicle
  */
 export const updateVehicleStatus = async (id, status) => {
-  const response = await axiosInstance.put(VEHICLE_API.UPDATE_STATUS.replace('{id}', id), {
-    status,
-  })
+  // ✅ Use PATCH with query parameter (matches backend @PatchMapping with @RequestParam)
+  const response = await axiosInstance.patch(`/api/vehicles/${id}/status?status=${status}`)
   return response.data.data
 }
 

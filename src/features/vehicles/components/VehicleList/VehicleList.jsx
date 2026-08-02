@@ -99,13 +99,16 @@ export const VehicleList = () => {
                       Vehicle
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                      Vehicle Number
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                       Plate Number
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                       Type
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                      Mileage
+                      Year
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                       Status
@@ -120,41 +123,50 @@ export const VehicleList = () => {
                     <tr key={vehicle.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{getVehicleTypeIcon(vehicle.type)}</span>
+                          <span className="text-2xl">
+                            {getVehicleTypeIcon(vehicle.vehicleType || vehicle.type)}
+                          </span>
                           <div>
                             <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              {vehicle.make} {vehicle.model}
+                              {vehicle.brand || vehicle.make} {vehicle.model}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {vehicle.year}
+                              {vehicle.manufacturer || ''}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                        {vehicle.plateNumber}
+                        {vehicle.vehicleNumber || 'N/A'}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                        {VEHICLE_TYPES_LABELS[vehicle.type] || vehicle.type}
+                        {vehicle.plateNumber || 'N/A'}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                        {formatMileage(vehicle.mileage)}
+                        {VEHICLE_TYPES_LABELS[vehicle.vehicleType || vehicle.type] ||
+                          vehicle.vehicleType ||
+                          vehicle.type ||
+                          'N/A'}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        {vehicle.year || 'N/A'}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <Badge
                           variant={
                             vehicle.status === 'AVAILABLE'
                               ? 'success'
-                              : vehicle.status === 'IN_USE'
+                              : vehicle.status === 'ASSIGNED' || vehicle.status === 'IN_USE'
                                 ? 'info'
-                                : vehicle.status === 'MAINTENANCE'
+                                : vehicle.status === 'UNDER_MAINTENANCE' ||
+                                    vehicle.status === 'MAINTENANCE'
                                   ? 'warning'
-                                  : vehicle.status === 'REPAIR'
+                                  : vehicle.status === 'RETIRED'
                                     ? 'danger'
                                     : 'default'
                           }
                         >
-                          {VEHICLE_STATUSES_LABELS[vehicle.status] || vehicle.status}
+                          {VEHICLE_STATUSES_LABELS[vehicle.status] || vehicle.status || 'AVAILABLE'}
                         </Badge>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">

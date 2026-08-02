@@ -209,11 +209,12 @@ export const useVehicles = () => {
     [currentVehicle]
   )
 
-  // ===== Update Vehicle Status =====
+  // ===== ✅ FIXED: Update Vehicle Status =====
   const updateVehicleStatus = useCallback(
     async (id, status) => {
       setLoading(true)
       try {
+        // ✅ This should call the PATCH endpoint
         const vehicle = await vehicleService.updateVehicleStatus(id, status)
         setVehicles((prev) => prev.map((v) => (v.id === id ? vehicle : v)))
         if (currentVehicle?.id === id) {
@@ -255,7 +256,6 @@ export const useVehicles = () => {
       try {
         const result = await vehicleService.scheduleMaintenance(id, data)
         toast.success('Maintenance scheduled successfully')
-        // Refresh maintenance history
         await getMaintenanceHistory(id)
         return result
       } catch (err) {
@@ -310,7 +310,6 @@ export const useVehicles = () => {
   }, [])
 
   return {
-    // State
     loading,
     error,
     vehicles,
@@ -318,8 +317,6 @@ export const useVehicles = () => {
     maintenanceHistory,
     stats,
     pagination,
-
-    // Actions
     fetchVehicles,
     fetchAvailableVehicles,
     getVehicle,
@@ -329,7 +326,7 @@ export const useVehicles = () => {
     deleteVehicle,
     assignVehicle,
     unassignVehicle,
-    updateVehicleStatus,
+    updateVehicleStatus, // ← This is the one that should call PATCH
     getMaintenanceHistory,
     scheduleMaintenance,
     getStats,

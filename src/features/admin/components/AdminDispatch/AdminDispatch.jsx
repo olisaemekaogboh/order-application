@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { dispatchService } from '@/shared/services/dispatchService'
+import { adminService } from '../../services/adminService'
 import Table from '@/shared/components/ui/Table/Table'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
@@ -14,7 +14,9 @@ const AdminDispatch = () => {
   const fetchDispatches = async () => {
     setLoading(true)
     try {
-      const response = await dispatchService.getAllDispatches({
+      // Note: You'll need to add this method to adminService
+      // For now, using a placeholder - you'll need to implement the actual endpoint
+      const response = await adminService.getDispatches({
         page: pagination.page,
         size: pagination.size,
       })
@@ -40,8 +42,8 @@ const AdminDispatch = () => {
     { key: 'id', label: 'ID', render: (val) => val.slice(0, 8) },
     { key: 'orderId', label: 'Order' },
     { key: 'status', label: 'Status' },
-    { key: 'driverId', label: 'Driver', render: (val) => val?.slice(0, 8) },
-    { key: 'vehicleId', label: 'Vehicle', render: (val) => val?.slice(0, 8) },
+    { key: 'driverId', label: 'Driver', render: (val) => val?.slice(0, 8) || 'N/A' },
+    { key: 'vehicleId', label: 'Vehicle', render: (val) => val?.slice(0, 8) || 'N/A' },
     { key: 'createdAt', label: 'Created', render: (val) => new Date(val).toLocaleString() },
   ]
 
@@ -49,11 +51,13 @@ const AdminDispatch = () => {
     <div>
       <h1 className="text-2xl font-bold mb-6">Dispatch Management</h1>
       {loading ? <Spinner /> : <Table data={dispatches} columns={columns} />}
-      <Pagination
-        currentPage={pagination.page + 1}
-        totalPages={pagination.totalPages}
-        onPageChange={(page) => setPagination((prev) => ({ ...prev, page: page - 1 }))}
-      />
+      {dispatches.length > 0 && (
+        <Pagination
+          currentPage={pagination.page + 1}
+          totalPages={pagination.totalPages}
+          onPageChange={(page) => setPagination((prev) => ({ ...prev, page: page - 1 }))}
+        />
+      )}
     </div>
   )
 }

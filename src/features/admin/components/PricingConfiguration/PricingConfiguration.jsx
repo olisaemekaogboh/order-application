@@ -7,12 +7,52 @@ import { VEHICLE_TYPES_LABELS } from '../../../drivers/constants'
 import toast from 'react-hot-toast'
 
 const PricingConfiguration = () => {
-  const { pricingConfigs, loading, fetchPricingConfigs, deletePricingConfig } = useAdmin()
+  const {
+    pricingConfigs,
+    loading,
+    fetchPricingConfigs,
+    createPricingConfig,
+    updatePricingConfig,
+    deletePricingConfig,
+  } = useAdmin()
+
   const [editingId, setEditingId] = useState(null)
+  const [editingConfig, setEditingConfig] = useState(null)
 
   useEffect(() => {
     fetchPricingConfigs()
   }, [])
+
+  // Handle save (create or update)
+  const handleSave = async (data) => {
+    try {
+      if (editingId) {
+        // Update existing
+        await updatePricingConfig(editingId, data)
+        setEditingId(null)
+        setEditingConfig(null)
+        toast.success('Pricing configuration updated successfully')
+      } else {
+        // Create new
+        await createPricingConfig(data)
+        toast.success('Pricing configuration created successfully')
+      }
+    } catch (error) {
+      // Error is already handled in the hook
+      throw error
+    }
+  }
+
+  // Handle edit - set the config data for the form
+  const handleEdit = (config) => {
+    setEditingId(config.id)
+    setEditingConfig(config)
+  }
+
+  const handleCancel = () => {
+    setEditingId(null)
+    setEditingConfig(null)
+  }
 
   const handleDelete = async (id) => {
     if (window.confirm('Delete this pricing configuration?')) {
@@ -34,7 +74,12 @@ const PricingConfiguration = () => {
         Pricing Configuration
       </h1>
 
-      <PricingConfigForm editingId={editingId} onCancel={() => setEditingId(null)} />
+      <PricingConfigForm
+        onSave={handleSave}
+        editingId={editingId}
+        onCancel={handleCancel}
+        initialData={editingConfig}
+      />
 
       <div className="mt-8">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
@@ -58,7 +103,7 @@ const PricingConfiguration = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => setEditingId(config.id)}>
+                <Button size="sm" variant="ghost" onClick={() => handleEdit(config)}>
                   Edit
                 </Button>
                 <Button

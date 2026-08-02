@@ -172,10 +172,7 @@ function AppRoutes() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/analytics" element={<DriverAnalytics />} /> {/* NEW ROUTE */}
           <Route path="/admin/orders" element={<OrderManagement />} />
-          <Route
-            path="/admin/orders/create"
-            element={<Placeholder title="Create Order (Admin)" />}
-          />
+          <Route path="/admin/orders/create" element={<Placeholder title="" />} />
           <Route path="/admin/orders/:id" element={<Placeholder title="Admin Order Details" />} />
           <Route
             path="/admin/orders/:id/edit"

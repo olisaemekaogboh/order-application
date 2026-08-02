@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { userService } from '../../../customers/services/userService'
+import { adminService } from '../../services/adminService'
 import Table from '@/shared/components/ui/Table/Table'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
@@ -16,8 +16,8 @@ const AdminCustomers = () => {
   const fetchCustomers = async (params = {}) => {
     setLoading(true)
     try {
-      // Use userService to get users with role CLIENT
-      const response = await userService.getUsers({
+      // ✅ Use adminService with role filter
+      const response = await adminService.getAllUsers({
         role: 'CLIENT',
         page: pagination.page,
         size: pagination.size,

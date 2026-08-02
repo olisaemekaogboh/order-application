@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { paymentService } from '../../../payments/services/paymentService'
+import { adminService } from '../../services/adminService'
 import Table from '@/shared/components/ui/Table/Table'
 import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
@@ -14,7 +14,7 @@ const AdminPayments = () => {
   const fetchPayments = async () => {
     setLoading(true)
     try {
-      const response = await paymentService.getAllPayments({
+      const response = await adminService.getAllPayments({
         page: pagination.page,
         size: pagination.size,
       })
@@ -44,12 +44,13 @@ const AdminPayments = () => {
     { key: 'createdAt', label: 'Date', render: (val) => new Date(val).toLocaleString() },
   ]
 
-  if (loading && payments.length === 0)
+  if (loading && payments.length === 0) {
     return (
       <div className="flex justify-center py-12">
         <Spinner size="lg" />
       </div>
     )
+  }
 
   return (
     <div>

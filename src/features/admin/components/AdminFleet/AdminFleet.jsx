@@ -1,33 +1,47 @@
 import React, { useEffect, useState } from 'react'
-import { fleetService } from '@/shared/services/fleetService'
+import { adminService } from '../../services/adminService'
 import StatCard from '../../../client/components/Dashboard/components/StatCard'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
+import toast from 'react-hot-toast'
 
 const AdminFleet = () => {
   const [analytics, setAnalytics] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fleetService
+    // ✅ Use adminService with the correct endpoint
+    adminService
       .getFleetAnalytics()
       .then(setAnalytics)
-      .catch(console.error)
+      .catch((err) => {
+        console.error('Error fetching fleet analytics:', err)
+        toast.error('Failed to load fleet data')
+        // Set default values to prevent crash
+        setAnalytics({
+          totalVehicles: 0,
+          availableVehicles: 0,
+          inTransitVehicles: 0,
+          maintenanceVehicles: 0,
+        })
+      })
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex justify-center py-12">
         <Spinner size="lg" />
       </div>
     )
+  }
+
   if (!analytics) return <div>No data</div>
 
   const stats = [
-    { title: 'Total Vehicles', value: analytics.totalVehicles, color: 'blue' },
-    { title: 'Available', value: analytics.availableVehicles, color: 'green' },
-    { title: 'In Transit', value: analytics.inTransitVehicles, color: 'amber' },
-    { title: 'Maintenance', value: analytics.maintenanceVehicles, color: 'red' },
+    { title: 'Total Vehicles', value: analytics.totalVehicles || 0, color: 'blue' },
+    { title: 'Available', value: analytics.availableVehicles || 0, color: 'green' },
+    { title: 'In Transit', value: analytics.inTransitVehicles || 0, color: 'amber' },
+    { title: 'Maintenance', value: analytics.maintenanceVehicles || 0, color: 'red' },
   ]
 
   return (
@@ -38,7 +52,6 @@ const AdminFleet = () => {
           <StatCard key={stat.title} {...stat} />
         ))}
       </div>
-      {/* Additional charts or tables could be added */}
     </div>
   )
 }

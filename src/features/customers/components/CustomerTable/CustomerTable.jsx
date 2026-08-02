@@ -3,45 +3,19 @@ import { CUSTOMER_ROLES_LABELS } from '../../constants'
 import { formatDate } from '@/shared/utils/formatters/dateFormatter'
 import Badge from '@/shared/components/ui/Badge/Badge'
 
-const CustomerTable = ({ customers = [], showActions = false }) => {
-  // Log the customers data to see what's being received
-
-  // Alternative: Handle date that might be in different formats
-  const renderDate = (date, userId) => {
-    if (!date) return 'N/A'
-
-    try {
-      let dateObj
-
-      // If date is an array like [2024, 1, 1, 12, 30, 0]
-      if (Array.isArray(date)) {
-        const [year, month, day, hour, minute, second] = date
-        dateObj = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0)
-      }
-      // If date is an object with year/month/day
-      else if (typeof date === 'object' && date !== null) {
-        if (date.year !== undefined && date.month !== undefined) {
-          dateObj = new Date(date.year, date.month - 1, date.day || 1)
-        } else if (date instanceof Date) {
-          dateObj = date
-        } else {
-          // Try to convert to string
-          dateObj = new Date(date.toString())
-        }
-      }
-      // If date is a string or number
-      else {
-        dateObj = new Date(date)
-      }
-
-      // Check if valid
-      if (isNaN(dateObj.getTime())) {
-        return 'Invalid Date'
-      }
-
-      return formatDate(dateObj)
-    } catch (error) {
-      return 'Invalid Date'
+const CustomerTable = ({
+  customers = [],
+  showActions = false,
+  onDeleteUser = null, // Add delete handler prop
+}) => {
+  // Handle delete with confirmation
+  const handleDelete = (userId, userName) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete user "${userName}"? This action cannot be undone.`
+      )
+    ) {
+      onDeleteUser(userId)
     }
   }
 
@@ -73,46 +47,66 @@ const CustomerTable = ({ customers = [], showActions = false }) => {
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          {customers.map((user) => {
-            return (
-              <tr key={user.id}>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  {user.fullName || `${user.firstName} ${user.lastName}`}
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  {user.email}
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  <Badge variant="default">{CUSTOMER_ROLES_LABELS[user.role] || user.role}</Badge>
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm">
-                  <Badge
-                    variant={
-                      user.enabled && user.status !== 'SUSPENDED'
-                        ? 'success'
-                        : user.status === 'SUSPENDED'
-                          ? 'warning'
-                          : 'danger'
-                    }
-                  >
-                    {user.enabled && user.status !== 'SUSPENDED'
-                      ? 'Active'
+          {customers.map((user) => (
+            <tr key={user.id}>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                {user.fullName || `${user.firstName} ${user.lastName}`}
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                {user.email}
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                <Badge variant="default">{CUSTOMER_ROLES_LABELS[user.role] || user.role}</Badge>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm">
+                <Badge
+                  variant={
+                    user.enabled && user.status !== 'SUSPENDED'
+                      ? 'success'
                       : user.status === 'SUSPENDED'
-                        ? 'Suspended'
-                        : 'Disabled'}
-                  </Badge>
+                        ? 'warning'
+                        : 'danger'
+                  }
+                >
+                  {user.enabled && user.status !== 'SUSPENDED'
+                    ? 'Active'
+                    : user.status === 'SUSPENDED'
+                      ? 'Suspended'
+                      : 'Disabled'}
+                </Badge>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                {formatDate(user.createdAt)}
+              </td>
+              {showActions && (
+                <td className="px-4 py-4 whitespace-nowrap text-sm space-x-2">
+                  {/* Delete Button */}
+                  <button
+                    onClick={() =>
+                      handleDelete(user.id, user.fullName || `${user.firstName} ${user.lastName}`)
+                    }
+                    className="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium rounded-md transition-colors duration-150 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                    Delete
+                  </button>
+                  {/* You can add other action buttons here */}
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  {renderDate(user.createdAt, user.id)}
-                </td>
-                {showActions && (
-                  <td className="px-4 py-4 whitespace-nowrap text-sm space-x-2">
-                    {/* Add action buttons here if needed */}
-                  </td>
-                )}
-              </tr>
-            )
-          })}
+              )}
+            </tr>
+          ))}
           {customers.length === 0 && (
             <tr>
               <td
