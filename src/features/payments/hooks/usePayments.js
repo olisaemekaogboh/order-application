@@ -1,3 +1,4 @@
+// features/payments/hooks/usePayments.js
 import { useState, useCallback } from 'react'
 import { paymentService } from '../services/paymentService'
 import { toast } from 'react-hot-toast'
@@ -8,6 +9,7 @@ export const usePayments = () => {
   const [error, setError] = useState(null)
   const [payments, setPayments] = useState([])
   const [currentPayment, setCurrentPayment] = useState(null)
+  const [statistics, setStatistics] = useState(null)
   const [pagination, setPagination] = useState({
     page: PAYMENT_DEFAULTS.PAGE,
     size: PAYMENT_DEFAULTS.SIZE,
@@ -37,7 +39,7 @@ export const usePayments = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await paymentService.processPayment(data)
+      const result = await paymentService.verifyPayment(data)
       toast.success('Payment processed successfully')
       return result
     } catch (err) {
@@ -55,7 +57,7 @@ export const usePayments = () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await paymentService.verifyPayment(reference)
+      const result = await paymentService.verifyPayment({ transactionReference: reference })
       toast.success('Payment verified successfully')
       return result
     } catch (err) {
@@ -117,9 +119,9 @@ export const usePayments = () => {
         })
         setPayments(response.content || [])
         setPagination({
-          page: response.page || 0,
-          size: response.size || PAYMENT_DEFAULTS.SIZE,
-          total: response.total || 0,
+          page: response.pageNumber || response.page || 0,
+          size: response.pageSize || response.size || PAYMENT_DEFAULTS.SIZE,
+          total: response.totalElements || response.total || 0,
           totalPages: response.totalPages || 0,
         })
         return response
@@ -135,13 +137,31 @@ export const usePayments = () => {
     [pagination.page, pagination.size]
   )
 
+  // ===== Get Payment Statistics (Admin only) =====
+  const getPaymentStatistics = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const stats = await paymentService.getPaymentStatistics()
+      setStatistics(stats)
+      return stats
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to fetch payment statistics'
+      setError(message)
+      toast.error(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   // ===== Refund Payment =====
   const refundPayment = useCallback(
     async (paymentId, data) => {
       setLoading(true)
       setError(null)
       try {
-        const result = await paymentService.refundPayment(paymentId, data)
+        const result = await paymentService.refundPayment(data)
         // Update current payment if it matches
         if (currentPayment?.id === paymentId) {
           setCurrentPayment(result)
@@ -159,6 +179,24 @@ export const usePayments = () => {
     },
     [currentPayment]
   )
+
+  // ===== Cancel Payment =====
+  const cancelPayment = useCallback(async (data) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await paymentService.cancelPayment(data)
+      toast.success('Payment cancelled successfully')
+      return result
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to cancel payment'
+      setError(message)
+      toast.error(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   // ===== Change Page =====
   const changePage = useCallback((page) => {
@@ -178,6 +216,7 @@ export const usePayments = () => {
   const reset = useCallback(() => {
     setPayments([])
     setCurrentPayment(null)
+    setStatistics(null)
     setError(null)
     setPagination({
       page: PAYMENT_DEFAULTS.PAGE,
@@ -193,6 +232,7 @@ export const usePayments = () => {
     error,
     payments,
     currentPayment,
+    statistics,
     pagination,
 
     // Actions
@@ -202,7 +242,9 @@ export const usePayments = () => {
     getPaymentByOrder,
     getPaymentByReference,
     getUserPayments,
+    getPaymentStatistics,
     refundPayment,
+    cancelPayment,
     changePage,
     changePageSize,
     clearCurrentPayment,
