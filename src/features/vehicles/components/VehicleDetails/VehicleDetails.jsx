@@ -41,26 +41,6 @@ export const VehicleDetails = () => {
     }
   }, [id])
 
-  const handleStatusChange = async (newStatus) => {
-    if (window.confirm(`Change vehicle status to "${VEHICLE_STATUSES_LABELS[newStatus]}"?`)) {
-      setStatusUpdateLoading(true)
-      try {
-        // ✅ Call the fixed service
-        const result = await updateVehicleStatus(id, newStatus)
-        toast.success(`Vehicle status updated to ${VEHICLE_STATUSES_LABELS[newStatus]}`)
-        // ✅ Update local state
-        setCurrentVehicle(result)
-        // ✅ Refresh from server
-        await getVehicle(id)
-      } catch (error) {
-        console.error('Status update error:', error)
-        toast.error(error.response?.data?.message || 'Failed to update status')
-      } finally {
-        setStatusUpdateLoading(false)
-      }
-    }
-  }
-
   const handleDelete = async () => {
     if (window.confirm('Delete this vehicle?')) {
       await deleteVehicle(id)
