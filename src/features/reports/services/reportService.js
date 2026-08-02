@@ -1,6 +1,27 @@
 import axiosInstance from '@/shared/utils/helpers/axiosConfig'
 
 export const reportService = {
+  // ===== GENERATE REPORTS =====
+
+  // Generic generate report method
+  generateReport: async (data) => {
+    const { type, ...filters } = data
+
+    // Map report type to the correct endpoint
+    const endpoints = {
+      REVENUE: '/reports/revenue',
+      ORDERS: '/reports/orders',
+      DRIVERS: '/reports/drivers',
+      CUSTOMERS: '/reports/customers',
+      DELIVERY: '/reports/delivery',
+      DASHBOARD: '/reports/dashboard',
+    }
+
+    const endpoint = endpoints[type] || endpoints.REVENUE
+    const response = await axiosInstance.post(endpoint, filters)
+    return response.data.data
+  },
+
   // Revenue Report - POST
   generateRevenueReport: async (data) => {
     const response = await axiosInstance.post('/reports/revenue', data)
@@ -31,94 +52,205 @@ export const reportService = {
     return response.data.data
   },
 
-  // Dashboard Analytics - GET (this one is GET in backend)
+  // Dashboard Analytics - GET
   getDashboardAnalytics: async () => {
     const response = await axiosInstance.get('/reports/dashboard')
     return response.data.data
   },
 
-  // Download endpoints (POST)
-  downloadRevenuePdf: async (data) => {
-    const response = await axiosInstance.post('/reports/revenue/pdf', data, {
+  // ===== GET REPORTS =====
+
+  getReportById: async (id) => {
+    const response = await axiosInstance.get(`/reports/${id}`)
+    return response.data.data
+  },
+
+  deleteReport: async (id) => {
+    const response = await axiosInstance.delete(`/reports/${id}`)
+    return response.data
+  },
+
+  // ===== DOWNLOAD REPORTS =====
+
+  downloadReport: async (id, format = 'pdf') => {
+    const response = await axiosInstance.get(`/reports/${id}/download`, {
+      params: { format },
       responseType: 'blob',
     })
     return response.data
+  },
+
+  exportReport: async (filters, format = 'pdf') => {
+    const response = await axiosInstance.post('/reports/export', filters, {
+      params: { format },
+      responseType: 'blob',
+    })
+    return response.data
+  },
+
+  // ===== REVENUE DOWNLOADS =====
+
+  downloadRevenuePdf: async (data) => {
+    try {
+      const response = await axiosInstance.post('/reports/revenue/pdf', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading revenue PDF:', error)
+      throw error
+    }
   },
 
   downloadRevenueExcel: async (data) => {
-    const response = await axiosInstance.post('/reports/revenue/excel', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/revenue/excel', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading revenue Excel:', error)
+      throw error
+    }
   },
 
   downloadRevenueCsv: async (data) => {
-    const response = await axiosInstance.post('/reports/revenue/csv', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/revenue/csv', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading revenue CSV:', error)
+      throw error
+    }
   },
 
+  // ===== ORDER DOWNLOADS =====
+
   downloadOrdersPdf: async (data) => {
-    const response = await axiosInstance.post('/reports/orders/pdf', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/orders/pdf', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading orders PDF:', error)
+      throw error
+    }
   },
 
   downloadOrdersExcel: async (data) => {
-    const response = await axiosInstance.post('/reports/orders/excel', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/orders/excel', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading orders Excel:', error)
+      throw error
+    }
   },
 
   downloadOrdersCsv: async (data) => {
-    const response = await axiosInstance.post('/reports/orders/csv', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/orders/csv', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading orders CSV:', error)
+      throw error
+    }
   },
 
+  // ===== DRIVER DOWNLOADS =====
+
   downloadDriversPdf: async (data) => {
-    const response = await axiosInstance.post('/reports/drivers/pdf', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/drivers/pdf', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading drivers PDF:', error)
+      throw error
+    }
   },
 
   downloadDriversExcel: async (data) => {
-    const response = await axiosInstance.post('/reports/drivers/excel', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/drivers/excel', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading drivers Excel:', error)
+      throw error
+    }
   },
 
   downloadDriversCsv: async (data) => {
-    const response = await axiosInstance.post('/reports/drivers/csv', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/drivers/csv', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading drivers CSV:', error)
+      throw error
+    }
   },
 
+  // ===== CUSTOMER DOWNLOADS =====
+
   downloadCustomersPdf: async (data) => {
-    const response = await axiosInstance.post('/reports/customers/pdf', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/customers/pdf', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading customers PDF:', error)
+      throw error
+    }
   },
 
   downloadCustomersExcel: async (data) => {
-    const response = await axiosInstance.post('/reports/customers/excel', data, {
-      responseType: 'blob',
-    })
-    return response.data
+    try {
+      const response = await axiosInstance.post('/reports/customers/excel', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading customers Excel:', error)
+      throw error
+    }
   },
 
   downloadCustomersCsv: async (data) => {
-    const response = await axiosInstance.post('/reports/customers/csv', data, {
-      responseType: 'blob',
-    })
+    try {
+      const response = await axiosInstance.post('/reports/customers/csv', data, {
+        responseType: 'blob',
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error downloading customers CSV:', error)
+      throw error
+    }
+  },
+
+  // ===== SCHEDULE REPORTS =====
+
+  scheduleReport: async (data) => {
+    const response = await axiosInstance.post('/reports/schedule', data)
+    return response.data.data
+  },
+
+  cancelSchedule: async (id) => {
+    const response = await axiosInstance.delete(`/reports/schedule/${id}`)
     return response.data
   },
 }
+
+export default reportService

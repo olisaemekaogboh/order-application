@@ -1,52 +1,137 @@
-import React, { useEffect } from 'react'
+import React, { useState } from 'react'
 import { useReports } from '../../hooks/useReports'
 import Badge from '@/shared/components/ui/Badge/Badge'
 import Spinner from '@/shared/components/ui/Spinner/Spinner'
-import Pagination from '@/shared/components/ui/Pagination/Pagination'
 import EmptyState from '@/shared/components/ui/EmptyState/EmptyState'
 import Button from '@/shared/components/ui/Button/Button'
-import { Download, Trash2, Eye } from 'lucide-react'
+import { Download, Trash2, Eye, RefreshCw, FileText } from 'lucide-react'
 import { REPORT_STATUSES } from '../../constants'
 import { getReportTypeLabel, getReportTypeIcon } from '../../utils'
 import { formatFileSize } from '@/shared/utils/formatters'
 import { formatReportDate } from '../../utils'
 
-export const ReportList = ({ onViewReport }) => {
-  const {
-    reports,
-    loading,
-    pagination,
-    fetchReports,
-    downloadReport,
-    deleteReport,
-    exporting,
-    changePage,
-  } = useReports()
+export const ReportList = ({ onViewReport, currentReport, filters, onRegenerate }) => {
+  const { reports, loading, downloadReport, deleteReport, exporting } = useReports()
 
-  useEffect(() => {
-    fetchReports()
-  }, [pagination.page])
+  const [selectedReport, setSelectedReport] = useState(currentReport)
 
-  const handleDownload = async (id, format) => {
-    await downloadReport(id, format)
+  // If no reports and no current report, show empty state
+  if (!loading && reports.length === 0 && !currentReport) {
+    return (
+      <EmptyState
+        icon="📄"
+        title="No Reports Generated"
+        description="Generate a report using the form above to get started."
+        action={
+          <Button onClick={onRegenerate}>
+            <FileText size={16} className="mr-2" />
+            Generate Report
+          </Button>
+        }
+      />
+    )
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Delete this report?')) {
-      await deleteReport(id)
-    }
+  // Show current generated report
+  if (currentReport) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">
+                  {getReportTypeIcon(currentReport.type || 'REVENUE')}
+                </span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {getReportTypeLabel(currentReport.type || 'REVENUE')}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {currentReport.period || 'Custom Range'}
+                  </p>
+                </div>
+              </div>
+              <Badge variant="success">Generated</Badge>
+            </div>
+          </div>
+
+          <div className="p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {currentReport.totalRevenue
+                    ? `₦${currentReport.totalRevenue.toLocaleString()}`
+                    : 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Revenue</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {currentReport.totalOrders || 0}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Orders</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {currentReport.averageOrderValue
+                    ? `₦${currentReport.averageOrderValue.toLocaleString()}`
+                    : 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Avg Order Value</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {currentReport.revenueGrowth
+                    ? `${currentReport.revenueGrowth.toFixed(1)}%`
+                    : 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Revenue Growth</p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() =>
+                  downloadReport(currentReport.id || 'report', filters?.format || 'pdf')
+                }
+                disabled={exporting}
+              >
+                <Download size={16} className="mr-2" />
+                Download PDF
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => downloadReport(currentReport.id || 'report', 'excel')}
+                disabled={exporting}
+              >
+                <Download size={16} className="mr-2" />
+                Download Excel
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => downloadReport(currentReport.id || 'report', 'csv')}
+                disabled={exporting}
+              >
+                <Download size={16} className="mr-2" />
+                Download CSV
+              </Button>
+              <Button size="sm" variant="ghost" onClick={onRegenerate}>
+                <RefreshCw size={16} className="mr-2" />
+                Regenerate
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const getStatusBadge = (status) => {
-    const variants = {
-      [REPORT_STATUSES.PENDING]: 'warning',
-      [REPORT_STATUSES.PROCESSING]: 'info',
-      [REPORT_STATUSES.COMPLETED]: 'success',
-      [REPORT_STATUSES.FAILED]: 'danger',
-    }
-    return variants[status] || 'default'
-  }
-
+  // Show loading state
   if (loading && reports.length === 0) {
     return (
       <div className="flex justify-center py-8">
@@ -55,16 +140,7 @@ export const ReportList = ({ onViewReport }) => {
     )
   }
 
-  if (reports.length === 0) {
-    return (
-      <EmptyState
-        icon="📄"
-        title="No Reports"
-        description="Generate your first report to get started."
-      />
-    )
-  }
-
+  // Show list of reports if any exist
   return (
     <div className="space-y-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -107,10 +183,12 @@ export const ReportList = ({ onViewReport }) => {
                     {report.period || 'N/A'}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <Badge variant={getStatusBadge(report.status)}>{report.status}</Badge>
+                    <Badge variant={report.status === 'COMPLETED' ? 'success' : 'warning'}>
+                      {report.status || 'PENDING'}
+                    </Badge>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                    {formatFileSize(report.fileSize)}
+                    {formatFileSize(report.fileSize || 0)}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                     {formatReportDate(report.createdAt)}
@@ -129,7 +207,7 @@ export const ReportList = ({ onViewReport }) => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleDownload(report.id, report.format || 'pdf')}
+                          onClick={() => downloadReport(report.id, report.format || 'pdf')}
                           disabled={exporting}
                           title="Download"
                           className="text-blue-600 hover:text-blue-800"
@@ -140,7 +218,11 @@ export const ReportList = ({ onViewReport }) => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleDelete(report.id)}
+                        onClick={() => {
+                          if (window.confirm('Delete this report?')) {
+                            deleteReport(report.id)
+                          }
+                        }}
                         className="text-red-600 hover:text-red-800"
                         title="Delete"
                       >
@@ -153,19 +235,6 @@ export const ReportList = ({ onViewReport }) => {
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Showing {pagination.page * pagination.size + 1} to{' '}
-          {Math.min((pagination.page + 1) * pagination.size, pagination.total)} of{' '}
-          {pagination.total} reports
-        </div>
-        <Pagination
-          currentPage={pagination.page + 1}
-          totalPages={pagination.totalPages}
-          onPageChange={(page) => changePage(page - 1)}
-        />
       </div>
     </div>
   )
