@@ -67,6 +67,9 @@ import AdminDispatch from '../features/admin/components/AdminDispatch/AdminDispa
 import AdminTracking from '../features/admin/components/AdminTracking/AdminTracking'
 import AdminFleet from '../features/admin/components/AdminFleet/AdminFleet'
 
+// ---- Driver Analytics Page ----
+import DriverAnalytics from '../features/analytics/components/DriverAnalytics/DriverAnalytics' // <-- NEW
+
 // ---- Driver Components ----
 import DriverDashboard from '../features/drivers/components/DriverDashboard/DriverDashboard'
 import DriverOrders from '../features/drivers/components/DriverOrders/DriverOrders'
@@ -167,6 +170,7 @@ function AppRoutes() {
       <Route element={<PrivateRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/analytics" element={<DriverAnalytics />} /> {/* NEW ROUTE */}
           <Route path="/admin/orders" element={<OrderManagement />} />
           <Route
             path="/admin/orders/create"

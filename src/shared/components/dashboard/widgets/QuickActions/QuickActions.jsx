@@ -1,22 +1,58 @@
 import React from 'react'
 
 const QuickActions = ({ actions = [] }) => {
+  if (!actions.length) return null
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <section>
+      <div className="mb-5">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
+
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Quickly access frequently used admin features.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {actions.map((action) => (
           <button
             key={action.id}
             onClick={action.onClick}
-            className={`${action.color} hover:opacity-90 text-white rounded-lg p-4 flex flex-col items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg`}
+            className={`
+              ${action.color}
+              group
+              h-28
+              rounded-xl
+              text-white
+              shadow-md
+              hover:shadow-xl
+              hover:-translate-y-1
+              active:scale-95
+              transition-all
+              duration-300
+              flex
+              flex-col
+              items-center
+              justify-center
+              gap-3
+              focus:outline-none
+              focus:ring-4
+              focus:ring-blue-300
+            `}
           >
-            <span className="text-3xl">{action.icon}</span>
-            <span className="text-sm font-medium text-center">{action.label}</span>
+            {action.icon && (
+              <div className="text-3xl transition-transform duration-300 group-hover:scale-110">
+                {action.icon}
+              </div>
+            )}
+
+            <span className="text-sm font-semibold text-center px-2 leading-tight">
+              {action.label}
+            </span>
           </button>
         ))}
       </div>
-    </div>
+    </section>
   )
 }
 

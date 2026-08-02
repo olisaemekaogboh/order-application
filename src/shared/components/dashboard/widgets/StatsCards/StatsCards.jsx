@@ -1,45 +1,59 @@
 import React from 'react'
 
-const StatsCards = ({ stats }) => {
+const StatsCards = ({ stats, revenue, drivers, reviews }) => {
   const cards = [
     {
       label: 'Total Orders',
-      value: stats?.totalOrders || 0,
-      icon: '📦',
-      color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+      value: stats?.totalOrders ?? 0,
+      border: 'border-blue-500',
     },
     {
-      label: 'Active Orders',
-      value: stats?.activeOrders || 0,
-      icon: '🔄',
-      color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+      label: 'Pending Orders',
+      value: stats?.pendingOrders ?? 0,
+      border: 'border-yellow-500',
     },
     {
-      label: 'Delivered',
-      value: stats?.deliveredOrders || 0,
-      icon: '✅',
-      color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+      label: 'Delivered Orders',
+      value: stats?.deliveredOrders ?? 0,
+      border: 'border-green-500',
     },
     {
       label: 'Total Revenue',
-      value: `₦${(stats?.totalRevenue || 0).toLocaleString()}`,
-      icon: '💰',
-      color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+      value: revenue?.formattedTotalRevenue ?? `₦${(stats?.totalRevenue ?? 0).toLocaleString()}`,
+      border: 'border-purple-500',
+    },
+    {
+      label: 'Total Drivers',
+      value: drivers?.totalDrivers ?? 0,
+      border: 'border-indigo-500',
+    },
+    {
+      label: 'Available Drivers',
+      value: drivers?.availableDrivers ?? 0,
+      border: 'border-emerald-500',
+    },
+    {
+      label: 'Total Reviews',
+      value: reviews?.totalReviews ?? 0,
+      border: 'border-pink-500',
+    },
+    {
+      label: 'Average Rating',
+      value: reviews?.averageRating != null ? reviews.averageRating.toFixed(1) : '0.0',
+      border: 'border-orange-500',
     },
   ]
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {cards.map((card, index) => (
+      {cards.map((card) => (
         <div
-          key={index}
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex items-center justify-between"
+          key={card.label}
+          className={`bg-white dark:bg-gray-800 rounded-xl shadow-md border-l-4 ${card.border} p-6 transition-shadow hover:shadow-lg`}
         >
-          <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.label}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{card.value}</p>
-          </div>
-          <div className={`${card.color} p-3 rounded-full text-2xl`}>{card.icon}</div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.label}</p>
+
+          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{card.value}</p>
         </div>
       ))}
     </div>

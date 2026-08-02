@@ -86,4 +86,25 @@ export const adminService = {
     const response = await axiosInstance.get(`/admin/audit-logs/user/${userId}`, { params })
     return response.data.data
   },
+
+  // ===== Dashboard Analytics (replaced methods) =====
+  getRevenueAnalytics: async (data) => {
+    const response = await axiosInstance.post('/admin/dashboard/revenue-analytics', data)
+    return response.data.data
+  },
+
+  getOrderAnalytics: async (data) => {
+    const response = await axiosInstance.post('/admin/dashboard/order-analytics', data)
+    return response.data.data
+  },
+
+  getDriverAnalytics: async (data) => {
+    const response = await axiosInstance.post('/admin/dashboard/driver-analytics', data)
+    return response.data.data
+  },
+
+  getReviewAnalytics: async () => {
+    const response = await axiosInstance.get('/admin/dashboard/reviews')
+    return response.data.data
+  },
 }

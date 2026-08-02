@@ -106,7 +106,7 @@ export const ADMIN_API = {
 export const ADMIN_ROUTES = {
   DASHBOARD: '/admin/dashboard',
   ORDERS: '/admin/orders',
-  DRIVERS: '/admin/drivers',
+  //DRIVERS: '/admin/drivers',
   VEHICLES: '/admin/vehicles',
   FLEET: '/admin/fleet',
   CUSTOMERS: '/admin/customers',
@@ -128,6 +128,7 @@ export const ADMIN_ROUTES = {
   SYSTEM_CONFIG: '/super-admin/system',
   AUDIT_LOGS: '/super-admin/audit',
   GLOBAL_REVENUE: '/super-admin/revenue',
+  DRIVER_ANALYTICS: '/admin/driver-analytics',
 }
 
 // ===== Dashboard Defaults =====

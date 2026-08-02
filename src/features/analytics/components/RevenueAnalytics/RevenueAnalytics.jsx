@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useAnalytics } from '../../hooks/useAnalytics'
 import RevenueChart from '../RevenueChart/RevenueChart'
 import RevenueReport from '../RevenueReport/RevenueReport'
 import { REPORT_PERIODS_LABELS } from '../../constants'
-import toast from 'react-hot-toast'
 
 const RevenueAnalytics = () => {
   const { reportData, loading, generateReport, period, changePeriod } = useAnalytics()
 
   useEffect(() => {
     generateReport({ period })
-  }, [period])
+  }, [period, generateReport])
 
   if (loading && !reportData) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
       </div>
     )
   }
@@ -26,23 +25,32 @@ const RevenueAnalytics = () => {
   }))
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Revenue Analytics</h1>
-      <div className="mb-4">
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Revenue Analytics</h1>
+
+        <p className="mt-2 text-gray-500 dark:text-gray-400">
+          Revenue trends and financial performance.
+        </p>
+      </div>
+
+      <div>
         <select
           value={period}
           onChange={(e) => changePeriod(e.target.value)}
-          className="rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white"
         >
-          {periodOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
+          {periodOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
       </div>
-      <div className="grid grid-cols-1 gap-8">
-        <RevenueChart data={reportData?.chartData} />
+
+      <div className="space-y-8">
+        <RevenueChart analytics={reportData} />
+
         <RevenueReport report={reportData} />
       </div>
     </div>

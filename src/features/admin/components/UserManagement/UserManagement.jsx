@@ -32,6 +32,11 @@ const UserManagement = () => {
     )
   }
 
+  // Calculate the range of items being displayed
+  const startItem = pagination.total > 0 ? pagination.page * pagination.size + 1 : 0
+  const endItem =
+    pagination.total > 0 ? Math.min((pagination.page + 1) * pagination.size, pagination.total) : 0
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -54,18 +59,18 @@ const UserManagement = () => {
 
       <CustomerTable customers={customers} showActions />
 
-      <div className="mt-6 flex justify-between items-center">
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Showing {pagination.page * pagination.size + 1} to{' '}
-          {Math.min((pagination.page + 1) * pagination.size, pagination.total)} of{' '}
-          {pagination.total} users
+      {pagination.total > 0 && (
+        <div className="mt-6 flex justify-between items-center">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Showing {startItem} to {endItem} of {pagination.total} users
+          </div>
+          <Pagination
+            currentPage={pagination.page + 1}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => changePage(page - 1)}
+          />
         </div>
-        <Pagination
-          currentPage={pagination.page + 1}
-          totalPages={pagination.totalPages}
-          onPageChange={(page) => changePage(page - 1)}
-        />
-      </div>
+      )}
     </div>
   )
 }
