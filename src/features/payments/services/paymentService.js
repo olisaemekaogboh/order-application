@@ -1,15 +1,28 @@
 // features/payments/services/paymentService.js
 import axiosInstance from '@/shared/utils/helpers/axiosConfig'
+import { PAYMENT_DEFAULTS } from '../constants'
 
-// ===== Payment Initialization =====
+// ===== Initialize Payment =====
 export const initializePayment = async (data) => {
-  const response = await axiosInstance.post('/payments/initialize', data)
+  const cleanData = {
+    orderId: data.orderId,
+    gateway: data.gateway || PAYMENT_DEFAULTS.GATEWAY,
+    paymentMethod: data.paymentMethod || 'CARD',
+    callbackUrl: data.callbackUrl || `${window.location.origin}/payment/callback`,
+    metadata: data.metadata || {},
+  }
+
+  const response = await axiosInstance.post('/payments/initialize', cleanData)
   return response.data.data
 }
 
 // ===== Payment Verification =====
 export const verifyPayment = async (data) => {
-  const response = await axiosInstance.post('/payments/verify', data)
+  const payload = {
+    transactionReference: data.transactionReference,
+    gatewayReference: data.gatewayReference || data.transactionReference,
+  }
+  const response = await axiosInstance.post('/payments/verify', payload)
   return response.data.data
 }
 
@@ -67,11 +80,7 @@ export const getPaymentStatus = async (reference) => {
   return payment?.status
 }
 
-// ===== Webhook Handlers (These are called by the backend, not directly from frontend) =====
-// The frontend doesn't call webhook endpoints directly - they are called by payment gateways
-// However, we provide them here for reference and testing
-
-// For testing webhooks locally (if needed)
+// ===== Webhook Handlers (For testing) =====
 export const simulatePaystackWebhook = async (payload) => {
   const response = await axiosInstance.post('/payments/webhook/paystack', payload, {
     headers: {
@@ -103,7 +112,6 @@ export const paymentService = {
   getAllPayments,
   getPaymentStatistics,
   getPaymentStatus,
-  // Webhook test helpers (for development)
   simulatePaystackWebhook,
   simulateFlutterwaveWebhook,
 }

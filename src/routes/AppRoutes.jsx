@@ -30,6 +30,7 @@ import { CreateOrder, OrderTracking, OrderHistory, OrderManagement } from '../fe
 
 // Payments
 import { PaymentHistory } from '../features/payments'
+import PaymentCallback from '../features/payments/components/PaymentCallback/PaymentCallback'
 
 // Client
 import { ClientDashboard, ClientProfile, ClientAddresses } from '../features/client'
@@ -115,6 +116,9 @@ function AppRoutes() {
       <Route element={<PrivateRoute allowedRoles={['CLIENT']} />}>
         <Route element={<DashboardLayout />}>
           <Route path="/client/dashboard" element={<ClientDashboard />} />
+
+          {/* Payment Callback - Public access for redirect */}
+          <Route path="/payment/callback" element={<PaymentCallback />} />
 
           {/* Orders – using exact constants */}
           <Route path="/client/create-order" element={<CreateOrder />} />

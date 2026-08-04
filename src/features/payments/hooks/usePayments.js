@@ -34,31 +34,21 @@ export const usePayments = () => {
     }
   }, [])
 
-  // ===== Process Payment =====
-  const processPayment = useCallback(async (data) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const result = await paymentService.verifyPayment(data)
-      toast.success('Payment processed successfully')
-      return result
-    } catch (err) {
-      const message = err.response?.data?.message || 'Payment processing failed'
-      setError(message)
-      toast.error(message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   // ===== Verify Payment =====
-  const verifyPayment = useCallback(async (reference) => {
+  const verifyPayment = useCallback(async (transactionReference, gatewayReference) => {
     setLoading(true)
     setError(null)
     try {
-      const result = await paymentService.verifyPayment({ transactionReference: reference })
-      toast.success('Payment verified successfully')
+      const result = await paymentService.verifyPayment({
+        transactionReference: transactionReference,
+        gatewayReference: gatewayReference || transactionReference,
+      })
+
+      if (result.successful) {
+        toast.success('Payment verified successfully!')
+      } else {
+        toast.error(result.message || 'Payment verification failed')
+      }
       return result
     } catch (err) {
       const message = err.response?.data?.message || 'Payment verification failed'
@@ -157,13 +147,12 @@ export const usePayments = () => {
 
   // ===== Refund Payment =====
   const refundPayment = useCallback(
-    async (paymentId, data) => {
+    async (data) => {
       setLoading(true)
       setError(null)
       try {
         const result = await paymentService.refundPayment(data)
-        // Update current payment if it matches
-        if (currentPayment?.id === paymentId) {
+        if (currentPayment?.id === data.paymentId) {
           setCurrentPayment(result)
         }
         toast.success('Payment refunded successfully')
@@ -237,7 +226,6 @@ export const usePayments = () => {
 
     // Actions
     initializePayment,
-    processPayment,
     verifyPayment,
     getPaymentByOrder,
     getPaymentByReference,

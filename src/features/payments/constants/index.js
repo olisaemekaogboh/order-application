@@ -1,3 +1,4 @@
+// features/payments/constants/index.js
 /**
  * Payments Constants
  * All payment-related constants in one place
@@ -65,6 +66,64 @@ export const PAYMENT_METHODS_ICONS = {
   [PAYMENT_METHODS.WALLET]: '👛',
 }
 
+// ===== Payment Gateways =====
+export const PAYMENT_GATEWAYS = {
+  PAYSTACK: 'PAYSTACK',
+  FLUTTERWAVE: 'FLUTTERWAVE',
+  MOCK: 'MOCK',
+}
+
+export const PAYMENT_GATEWAYS_LABELS = {
+  [PAYMENT_GATEWAYS.PAYSTACK]: 'Paystack',
+  [PAYMENT_GATEWAYS.FLUTTERWAVE]: 'Flutterwave',
+  [PAYMENT_GATEWAYS.MOCK]: 'Mock Payment (Testing)',
+}
+
+export const PAYMENT_GATEWAYS_COLORS = {
+  [PAYMENT_GATEWAYS.PAYSTACK]: 'bg-blue-600 hover:bg-blue-700',
+  [PAYMENT_GATEWAYS.FLUTTERWAVE]: 'bg-purple-600 hover:bg-purple-700',
+  [PAYMENT_GATEWAYS.MOCK]: 'bg-gray-500 hover:bg-gray-600',
+}
+
+export const PAYMENT_GATEWAYS_ICONS = {
+  [PAYMENT_GATEWAYS.PAYSTACK]: '🔷',
+  [PAYMENT_GATEWAYS.FLUTTERWAVE]: '🟣',
+  [PAYMENT_GATEWAYS.MOCK]: '🧪',
+}
+
+export const PAYMENT_GATEWAYS_LOGOS = {
+  [PAYMENT_GATEWAYS.PAYSTACK]: 'https://paystack.com/assets/images/logo.svg',
+  [PAYMENT_GATEWAYS.FLUTTERWAVE]: 'https://flutterwave.com/assets/images/logo.svg',
+}
+
+// ===== Test Cards (Updated with correct cards) =====
+export const TEST_CARDS = {
+  PAYSTACK: {
+    cardNumber: '4084 0808 0408 0808', // ✅ Paystack Visa test card
+    expiry: '09/32',
+    cvv: '408',
+    pin: '1234',
+    otp: '12345',
+    description: 'Visa Test Card (Paystack)',
+  },
+  FLUTTERWAVE: {
+    cardNumber: '5531 8866 5214 2950', // ✅ Flutterwave Mastercard test card
+    expiry: '09/32',
+    cvv: '564',
+    pin: '3310',
+    otp: '12345',
+    description: 'Mastercard Test Card (Flutterwave)',
+  },
+  MOCK: {
+    cardNumber: '0000 0000 0000 0000',
+    expiry: 'MM/YY',
+    cvv: '000',
+    pin: '0000',
+    otp: '00000',
+    description: 'Mock Payment - No card needed',
+  },
+}
+
 // ===== Payment Error Messages =====
 export const PAYMENT_ERRORS = {
   NOT_FOUND: 'Payment not found',
@@ -94,14 +153,17 @@ export const PAYMENT_SUCCESS = {
 export const PAYMENT_API = {
   BASE: '/payments',
   INITIALIZE: '/payments/initialize',
-  PROCESS: '/payments/process',
-  VERIFY: '/payments/verify/{reference}',
-  REFUND: '/payments/refund/{id}',
+  VERIFY: '/payments/verify',
+  REFUND: '/payments/refund',
+  CANCEL: '/payments/cancel',
   GET_BY_ORDER: '/payments/order/{orderId}',
-  GET_BY_REFERENCE: '/payments/reference/{reference}',
-  GET_HISTORY: '/payments/history',
+  GET_BY_REFERENCE: '/payments/{reference}',
+  GET_BY_GATEWAY_REFERENCE: '/payments/reference/{gatewayReference}',
   GET_USER_PAYMENTS: '/payments/user',
-  CALLBACK: '/payments/callback',
+  GET_ALL_PAYMENTS: '/payments/all',
+  GET_STATISTICS: '/payments/statistics',
+  WEBHOOK_PAYSTACK: '/payments/webhook/paystack',
+  WEBHOOK_FLUTTERWAVE: '/payments/webhook/flutterwave',
 }
 
 // ===== Payment Routes =====
@@ -111,21 +173,12 @@ export const PAYMENT_ROUTES = {
   SUCCESS: '/payment/success',
   FAILED: '/payment/failed',
   CALLBACK: '/payment/callback',
-}
-
-// ===== Payment Gateway Providers =====
-export const PAYMENT_GATEWAYS = {
-  PAYSTACK: 'PAYSTACK',
-  FLUTTERWAVE: 'FLUTTERWAVE',
-}
-
-export const PAYMENT_GATEWAYS_LABELS = {
-  [PAYMENT_GATEWAYS.PAYSTACK]: 'Paystack',
-  [PAYMENT_GATEWAYS.FLUTTERWAVE]: 'Flutterwave',
+  SELECT_GATEWAY: '/payment/select-gateway',
 }
 
 // ===== Payment Defaults =====
 export const PAYMENT_DEFAULTS = {
+  GATEWAY: 'FLUTTERWAVE',
   CURRENCY: 'NGN',
   PAGE: 0,
   SIZE: 20,

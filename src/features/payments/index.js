@@ -1,3 +1,4 @@
+// features/payments/index.js
 /**
  * Payments Feature Index
  * Main entry point for the payments feature
@@ -5,6 +6,11 @@
 
 // ===== Components =====
 export { default as PaymentHistory } from './components/PaymentHistory/PaymentHistory'
+export { default as PaymentButton } from './components/PaymentButton/PaymentButton'
+export { default as PaymentGatewaySelector } from './components/PaymentGatewaySelector/PaymentGatewaySelector'
+
+// ===== Pages =====
+export { default as PaymentCallback } from './components/PaymentCallback/PaymentCallback'
 
 // ===== Hooks =====
 export { usePayments } from './hooks/usePayments'
@@ -26,7 +32,11 @@ export {
   PAYMENT_ROUTES,
   PAYMENT_GATEWAYS,
   PAYMENT_GATEWAYS_LABELS,
+  PAYMENT_GATEWAYS_COLORS,
+  PAYMENT_GATEWAYS_ICONS,
+  PAYMENT_GATEWAYS_LOGOS,
   PAYMENT_DEFAULTS,
+  TEST_CARDS,
 } from './constants'
 
 // ===== Validations =====
