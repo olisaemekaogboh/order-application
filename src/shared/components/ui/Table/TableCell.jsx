@@ -1,3 +1,4 @@
+// shared/components/ui/Table/TableCell.jsx
 import React from 'react'
 import clsx from 'clsx'
 
@@ -19,5 +20,4 @@ const TableHeaderCell = ({ children, className = '', ...props }) => (
   </th>
 )
 
-
-export default TableCell
+export { TableCell as default, TableHeaderCell }

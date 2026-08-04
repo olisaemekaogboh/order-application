@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react'
-import { orderService } from '../../../orders/services/orderService'
-import { driverService } from '../../drivers/services/driverService'
+import trackingService from '../services/trackingService'
 import { toast } from 'react-hot-toast'
 import { TRACKING_API } from '../constants'
+import { useWebSocket } from '@/shared/hooks/useWebSocket'
 
 export const useTracking = () => {
   const [loading, setLoading] = useState(false)
@@ -10,17 +10,17 @@ export const useTracking = () => {
   const [trackingData, setTrackingData] = useState(null)
   const [driverLocation, setDriverLocation] = useState(null)
   const [trackingHistory, setTrackingHistory] = useState([])
+  const { subscribe, unsubscribe } = useWebSocket()
 
   // ===== Track Order =====
   const trackOrder = useCallback(async (orderId) => {
     setLoading(true)
     setError(null)
     try {
-      // Use the order tracking endpoint
-      const data = await orderService.trackOrder(orderId)
+      const data = await trackingService.trackOrder(orderId)
       setTrackingData(data)
       // Extract tracking history if available
-      if (data.trackingHistory) {
+      if (data?.trackingHistory) {
         setTrackingHistory(data.trackingHistory)
       }
       return data
@@ -38,14 +38,7 @@ export const useTracking = () => {
   const getDriverLocation = useCallback(async (driverId) => {
     setLoading(true)
     try {
-      // You might need a dedicated endpoint; using driver update for now
-      // In practice, you'd have a separate endpoint for getting driver location
-      const driver = await driverService.getDriverById(driverId)
-      const location = {
-        latitude: driver.currentLatitude,
-        longitude: driver.currentLongitude,
-        location: driver.currentLocation,
-      }
+      const location = await trackingService.getDriverLocation(driverId)
       setDriverLocation(location)
       return location
     } catch (err) {
@@ -61,7 +54,7 @@ export const useTracking = () => {
   const updateDriverLocation = useCallback(async (driverId, latitude, longitude, location) => {
     setLoading(true)
     try {
-      await driverService.updateLocation(driverId, latitude, longitude, location)
+      await trackingService.updateLocationDriver(driverId, latitude, longitude, location)
       setDriverLocation({ latitude, longitude, location })
       toast.success('Location updated')
     } catch (err) {
@@ -74,14 +67,63 @@ export const useTracking = () => {
   }, [])
 
   // ===== Subscribe to Real-time Updates (WebSocket) =====
-  const subscribeToTracking = useCallback((orderId, onLocationUpdate, onStatusUpdate) => {
-    // This would be handled via WebSocket; you can use the existing WebSocketService
-    // We'll expose an empty function here; the actual implementation would be in the component using useSocket
-    // For now, just return a cleanup function
-    return () => {
-      // Unsubscribe logic
-    }
-  }, [])
+  const subscribeToTracking = useCallback(
+    (trackingId, onLocationUpdate, onStatusUpdate) => {
+      if (!trackingId) {
+        console.warn('Cannot subscribe to tracking: No tracking ID provided')
+        return () => {}
+      }
+
+      // Subscribe to tracking updates
+      const topics = [`/topic/tracking/${trackingId}`, `/user/${trackingId}/queue/tracking`]
+
+      let subscriptions = []
+
+      topics.forEach((topic) => {
+        const sub = subscribe(topic, (message) => {
+          try {
+            const data = JSON.parse(message.body)
+
+            // Check if it's a location update
+            if (data.latitude && data.longitude) {
+              setDriverLocation({
+                latitude: data.latitude,
+                longitude: data.longitude,
+                location: data.location || '',
+              })
+              if (onLocationUpdate) {
+                onLocationUpdate(data)
+              }
+            }
+
+            // Check if it's a status update
+            if (data.status) {
+              setTrackingData((prev) => ({ ...prev, ...data }))
+              if (onStatusUpdate) {
+                onStatusUpdate(data)
+              }
+            }
+          } catch (e) {
+            console.error('Failed to parse WebSocket message:', e)
+          }
+        })
+
+        subscriptions.push(sub)
+      })
+
+      // Return cleanup function
+      return () => {
+        subscriptions.forEach((sub) => {
+          try {
+            unsubscribe(sub)
+          } catch (e) {
+            console.error('Failed to unsubscribe:', e)
+          }
+        })
+      }
+    },
+    [subscribe, unsubscribe]
+  )
 
   // ===== Clear Tracking Data =====
   const clearTracking = useCallback(() => {
