@@ -6,29 +6,46 @@
 // ===== Order Statuses =====
 export const ORDER_STATUSES = {
   PENDING: 'PENDING',
-  ASSIGNED: 'ASSIGNED',
+  PAYMENT_PENDING: 'PAYMENT_PENDING',
+  PAID: 'PAID',
+  READY_FOR_DISPATCH: 'READY_FOR_DISPATCH',
+  DISPATCH: 'DISPATCH',
   PICKED_UP: 'PICKED_UP',
   IN_TRANSIT: 'IN_TRANSIT',
   DELIVERED: 'DELIVERED',
+  COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED',
 }
 
 export const ORDER_STATUSES_LABELS = {
   [ORDER_STATUSES.PENDING]: 'Pending',
-  [ORDER_STATUSES.ASSIGNED]: 'Assigned',
+  [ORDER_STATUSES.PAYMENT_PENDING]: 'Payment Pending',
+  [ORDER_STATUSES.PAID]: 'Paid',
+  [ORDER_STATUSES.READY_FOR_DISPATCH]: 'Ready for Dispatch',
+  [ORDER_STATUSES.DISPATCH]: 'Dispatch',
   [ORDER_STATUSES.PICKED_UP]: 'Picked Up',
   [ORDER_STATUSES.IN_TRANSIT]: 'In Transit',
   [ORDER_STATUSES.DELIVERED]: 'Delivered',
+  [ORDER_STATUSES.COMPLETED]: 'Completed',
   [ORDER_STATUSES.CANCELLED]: 'Cancelled',
 }
 
 export const ORDER_STATUSES_COLORS = {
-  [ORDER_STATUSES.PENDING]: 'bg-yellow-100 text-yellow-800',
-  [ORDER_STATUSES.ASSIGNED]: 'bg-blue-100 text-blue-800',
-  [ORDER_STATUSES.PICKED_UP]: 'bg-purple-100 text-purple-800',
-  [ORDER_STATUSES.IN_TRANSIT]: 'bg-indigo-100 text-indigo-800',
-  [ORDER_STATUSES.DELIVERED]: 'bg-green-100 text-green-800',
-  [ORDER_STATUSES.CANCELLED]: 'bg-red-100 text-red-800',
+  [ORDER_STATUSES.PENDING]: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  [ORDER_STATUSES.PAYMENT_PENDING]:
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  [ORDER_STATUSES.PAID]: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  [ORDER_STATUSES.READY_FOR_DISPATCH]:
+    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  [ORDER_STATUSES.DISPATCH]:
+    'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+  [ORDER_STATUSES.PICKED_UP]:
+    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+  [ORDER_STATUSES.IN_TRANSIT]:
+    'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+  [ORDER_STATUSES.DELIVERED]: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  [ORDER_STATUSES.COMPLETED]: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  [ORDER_STATUSES.CANCELLED]: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
 }
 
 // ===== Payment Statuses =====

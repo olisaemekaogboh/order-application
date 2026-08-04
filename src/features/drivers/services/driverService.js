@@ -1,3 +1,4 @@
+// features/drivers/services/driverService.js
 import axiosInstance from '@/shared/utils/helpers/axiosConfig'
 
 export const driverService = {
@@ -5,7 +6,6 @@ export const driverService = {
   // ADMIN ENDPOINTS (for admin users)
   // ============================================
 
-  // ✅ Add this missing method
   registerDriverAdmin: async (data) => {
     const response = await axiosInstance.post('/admin/drivers', data)
     return response.data.data
@@ -70,6 +70,11 @@ export const driverService = {
     return response.data.data
   },
 
+  verifyDriverAdmin: async (id) => {
+    const response = await axiosInstance.put(`/admin/drivers/${id}/verify`)
+    return response.data.data
+  },
+
   // ============================================
   // PUBLIC/DRIVER ENDPOINTS (for driver users)
   // ============================================
@@ -79,12 +84,40 @@ export const driverService = {
     return response.data.data
   },
 
-  getAvailableDrivers: async (params = {}) => {
-    const response = await axiosInstance.get('/drivers/available', { params })
+  // ✅ FIXED: Get available drivers with pagination
+  getAvailableDrivers: async (page = 0, size = 20) => {
+    const response = await axiosInstance.get('/drivers/available', {
+      params: { page, size },
+    })
+    // Return the content array directly or the whole response
+    return response.data.data?.content || response.data.data || []
+  },
+
+  // ✅ FIXED: Get available drivers for assignment (returns List<DriverDTO>)
+  getAvailableDriversForAssignment: async (vehicleType = null) => {
+    const params = vehicleType ? { vehicleType } : {}
+    const response = await axiosInstance.get('/drivers/available/assignment', { params })
+    return response.data.data || []
+  },
+
+  // ✅ Get all drivers
+  getAllDrivers: async (page = 0, size = 20, sortBy = 'createdAt', sortDirection = 'DESC') => {
+    const response = await axiosInstance.get('/drivers', {
+      params: { page, size, sortBy, sortDirection },
+    })
     return response.data.data
   },
 
-  // These are for DRIVER users only (not admins)
+  getDriverById: async (id) => {
+    const response = await axiosInstance.get(`/drivers/${id}`)
+    return response.data.data
+  },
+
+  getDriverByEmail: async (email) => {
+    const response = await axiosInstance.get(`/drivers/email/${email}`)
+    return response.data.data
+  },
+
   updateMyAvailability: async (available) => {
     const response = await axiosInstance.put('/drivers/me/availability', { available })
     return response.data
@@ -113,9 +146,11 @@ export const driverService = {
     const response = await axiosInstance.put('/drivers/me', data)
     return response.data.data
   },
-  // In driverService.js, add to ADMIN ENDPOINTS section
-  verifyDriverAdmin: async (id) => {
-    const response = await axiosInstance.put(`/admin/drivers/${id}/verify`)
-    return response.data.data
+
+  deleteDriver: async (id) => {
+    const response = await axiosInstance.delete(`/drivers/${id}`)
+    return response.data
   },
 }
+
+export default driverService

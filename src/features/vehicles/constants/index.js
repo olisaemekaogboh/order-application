@@ -171,6 +171,7 @@ export const VEHICLE_SUCCESS = {
 export const VEHICLE_API = {
   BASE: '/vehicles',
   GET_ALL: '/vehicles',
+  GET_AVAILABLE: '/vehicles/available',
   GET_BY_ID: '/vehicles/{id}',
   GET_BY_PLATE: '/vehicles/plate/{plate}',
   CREATE: '/vehicles',
