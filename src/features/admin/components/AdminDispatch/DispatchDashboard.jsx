@@ -18,48 +18,59 @@ const DispatchDashboard = () => {
 
   const fetchData = async () => {
     setLoading(true)
+
     try {
-      const orders = await dispatchService.getReadyOrders()
-      setReadyOrders(orders || [])
+      const [orders, dispatchPage, analytics] = await Promise.all([
+        dispatchService.getReadyOrders(),
+        dispatchService.getAllDispatches({
+          page: 0,
+          size: 50,
+          sortBy: 'createdAt',
+          sortDirection: 'DESC',
+        }),
+        dispatchService.getDispatchAnalytics(),
+      ])
 
-      const allDispatches = await dispatchService.getAllDispatches({ page: 0, size: 50 })
-      setDispatches(allDispatches.content || [])
+      setReadyOrders(Array.isArray(orders) ? orders : [])
 
-      const analyticsData = await dispatchService.getDispatchAnalytics()
-      setAnalytics(analyticsData)
+      setDispatches(dispatchPage?.content ?? [])
+
+      setAnalytics(analytics ?? {})
     } catch (error) {
-      console.error('Failed to fetch dispatch data:', error)
-      toast.error('Failed to load dispatch dashboard')
+      console.error(error)
+      toast.error(error.response?.data?.message ?? 'Failed to load dispatch dashboard')
     } finally {
       setLoading(false)
     }
   }
-
   useEffect(() => {
     fetchData()
   }, [])
-
   const handleAssign = async (data) => {
+    if (!selectedOrder) return
+
     setAssigning(true)
+
     try {
-      const result = await dispatchService.manualAssign({
+      await dispatchService.manualAssign({
         orderId: selectedOrder.id,
         driverId: data.driverId,
         vehicleId: data.vehicleId,
-        priority: data.priority,
-        notes: data.notes,
+        priority: Number(data.priority ?? 0),
+        scheduledTime: null,
+        notes: data.notes ?? '',
       })
 
-      if (result) {
-        toast.success('Dispatch assigned successfully!')
-        setShowAssignModal(false)
-        setSelectedOrder(null)
-        await fetchData()
-      }
+      toast.success('Dispatch assigned successfully')
+
+      setShowAssignModal(false)
+      setSelectedOrder(null)
+
+      fetchData()
     } catch (error) {
-      console.error('Assignment failed:', error)
-      const message = error.response?.data?.message || 'Failed to assign dispatch'
-      toast.error(message)
+      console.error(error)
+
+      toast.error(error.response?.data?.message ?? 'Unable to assign dispatch')
     } finally {
       setAssigning(false)
     }
@@ -73,14 +84,24 @@ const DispatchDashboard = () => {
     )
   }
 
-  const analyticsCards = analytics
-    ? [
-        { label: 'Pending', value: analytics.pending || 0 },
-        { label: 'Active', value: analytics.active || 0 },
-        { label: 'Completed', value: analytics.completed || 0 },
-        { label: 'Failed', value: analytics.failed || 0 },
-      ]
-    : []
+  const analyticsCards = [
+    {
+      label: 'Pending',
+      value: analytics?.pendingDispatches ?? 0,
+    },
+    {
+      label: 'Active',
+      value: analytics?.activeDispatches ?? 0,
+    },
+    {
+      label: 'Completed',
+      value: analytics?.completedDispatches ?? 0,
+    },
+    {
+      label: 'Cancelled',
+      value: analytics?.cancelledDispatches ?? 0,
+    },
+  ]
 
   return (
     <div className="space-y-6">
@@ -134,7 +155,7 @@ const DispatchDashboard = () => {
             No active dispatches.
           </div>
         ) : (
-          <DispatchTable dispatches={dispatches} type="active" />
+          <DispatchTable dispatches={dispatches} type="active" onRefresh={fetchData} />
         )}
       </div>
 

@@ -130,45 +130,24 @@ const AdminDispatch = () => {
     try {
       let ordersData = []
       try {
-        const response = await orderService.getAllOrders({
-          page: 0,
-          size: 100,
-        })
-
-        // Debug: Log the full response
+        const response = await dispatchService.getReadyOrders()
         console.log('Full orders response:', response)
 
-        // Handle different response structures
-        ordersData = response?.content || response?.data?.content || response || []
-
-        // Debug: Log the raw orders data
-        console.log('Raw orders data:', ordersData)
-        console.log('Raw orders count:', ordersData.length)
-
-        // Log sample order to see its structure
-        if (ordersData.length > 0) {
-          console.log('Sample order:', ordersData[0])
-          console.log('Sample order keys:', Object.keys(ordersData[0]))
+        // Handle different response structures correctly
+        if (Array.isArray(response)) {
+          ordersData = response
+        } else if (response?.content && Array.isArray(response.content)) {
+          ordersData = response.content
+        } else if (response?.data?.content && Array.isArray(response.data.content)) {
+          ordersData = response.data.content
+        } else if (response?.data && Array.isArray(response.data)) {
+          ordersData = response.data
+        } else {
+          ordersData = []
         }
 
-        // Filter orders - check both paymentStatus and payment_status
-        ordersData = ordersData.filter((order) => {
-          const paymentStatus = order.paymentStatus || order.payment_status || order.paymentStatus
-          const orderStatus = order.status
-
-          console.log(
-            `Order ${order.orderNumber}: paymentStatus=${paymentStatus}, status=${orderStatus}`
-          )
-
-          return (
-            paymentStatus === 'PAID' &&
-            (orderStatus === 'READY_FOR_DISPATCH' ||
-              orderStatus === 'PAID' ||
-              orderStatus === 'DISPATCH')
-          )
-        })
-
-        console.log('Orders loaded (PAID & ready):', ordersData.length)
+        console.log('Orders loaded:', ordersData.length)
+        console.log('Sample order:', ordersData[0])
       } catch (e) {
         console.error('Could not fetch orders:', e)
         if (useMockData) {
@@ -185,12 +164,20 @@ const AdminDispatch = () => {
         }
       }
 
-      setOrders(ordersData || [])
+      // Set orders state
+      setOrders(ordersData)
 
+      // Fetch drivers
       let driversData = []
       try {
         const response = await driverService.getAvailableDrivers()
-        driversData = response?.content || response || []
+        if (Array.isArray(response)) {
+          driversData = response
+        } else if (response?.content && Array.isArray(response.content)) {
+          driversData = response.content
+        } else {
+          driversData = []
+        }
         console.log('Drivers loaded:', driversData.length)
       } catch (e) {
         console.warn('Failed to fetch drivers:', e)
@@ -201,12 +188,19 @@ const AdminDispatch = () => {
           ]
         }
       }
-      setDrivers(driversData || [])
+      setDrivers(driversData)
 
+      // Fetch vehicles
       let vehiclesData = []
       try {
         const response = await vehicleService.getAvailableVehicles()
-        vehiclesData = response?.content || response || []
+        if (Array.isArray(response)) {
+          vehiclesData = response
+        } else if (response?.content && Array.isArray(response.content)) {
+          vehiclesData = response.content
+        } else {
+          vehiclesData = []
+        }
         console.log('Vehicles loaded:', vehiclesData.length)
       } catch (e) {
         console.warn('Failed to fetch vehicles:', e)
@@ -231,10 +225,13 @@ const AdminDispatch = () => {
           ]
         }
       }
-      setVehicles(vehiclesData || [])
+      setVehicles(vehiclesData)
 
+      // Check if any data was loaded
       if (ordersData.length === 0 && driversData.length === 0 && vehiclesData.length === 0) {
         toast.error('No data available. Please create orders, drivers, and vehicles first.')
+      } else if (ordersData.length === 0) {
+        toast.warning('No ready orders available. Please create an order first.')
       }
     } catch (error) {
       console.error('Failed to fetch options:', error)
@@ -360,7 +357,7 @@ const AdminDispatch = () => {
       EN_ROUTE_PICKUP: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
       PICKUP_COMPLETED: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
       DELIVERY_IN_PROGRESS: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-      DELIVERED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+      COMPLETED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
       FAILED: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
       CANCELLED: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     }
@@ -375,7 +372,7 @@ const AdminDispatch = () => {
       EN_ROUTE_PICKUP: 'En Route to Pickup',
       PICKUP_COMPLETED: 'Pickup Completed',
       DELIVERY_IN_PROGRESS: 'Delivery In Progress',
-      DELIVERED: 'Delivered',
+      COMPLETED: 'Completed',
       FAILED: 'Failed',
       CANCELLED: 'Cancelled',
     }
@@ -383,11 +380,11 @@ const AdminDispatch = () => {
   }
 
   const canComplete = (status) => {
-    return !['DELIVERED', 'CANCELLED'].includes(status)
+    return ['DRIVER_ACCEPTED', 'EN_ROUTE_PICKUP', 'DELIVERY_IN_PROGRESS'].includes(status)
   }
 
   const canCancel = (status) => {
-    return !['DELIVERED', 'CANCELLED'].includes(status)
+    return !['COMPLETED', 'CANCELLED'].includes(status)
   }
 
   const canReassign = (status) => {
@@ -466,7 +463,7 @@ const AdminDispatch = () => {
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
           <p className="text-sm text-gray-500 dark:text-gray-400">Completed</p>
           <p className="text-2xl font-bold text-green-600">
-            {dispatches.filter((d) => d.status === 'DELIVERED').length}
+            {dispatches.filter((d) => d.status === 'COMPLETED').length}
           </p>
         </div>
       </div>
@@ -612,14 +609,25 @@ const AdminDispatch = () => {
           ) : (
             <>
               <div>
-                <Select
-                  label="Order *"
-                  options={orderOptions}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Order *
+                </label>
+                <select
                   value={formData.orderId}
                   onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
                   required
-                  placeholder={orders.length === 0 ? 'No orders available' : 'Select an order'}
-                />
+                >
+                  <option value="">
+                    {orders.length === 0 ? 'No orders available' : 'Select an order'}
+                  </option>
+                  {orders.map((order) => (
+                    <option key={order.id} value={order.id}>
+                      {order.orderNumber} - {order.pickupLocation || 'N/A'} →{' '}
+                      {order.deliveryLocation || 'N/A'}
+                    </option>
+                  ))}
+                </select>
                 {orders.length === 0 && (
                   <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
                     No orders available for dispatch. Please create an order first.
@@ -628,14 +636,31 @@ const AdminDispatch = () => {
               </div>
 
               <div>
-                <Select
-                  label="Driver *"
-                  options={driverOptions}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Driver *
+                </label>
+                <select
                   value={formData.driverId}
                   onChange={(e) => setFormData({ ...formData, driverId: e.target.value })}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
                   required
-                  placeholder={drivers.length === 0 ? 'No drivers available' : 'Select a driver'}
-                />
+                >
+                  <option value="">
+                    {drivers.length === 0 ? 'No drivers available' : 'Select a driver'}
+                  </option>
+                  {drivers.map((driver) => (
+                    <option
+                      key={driver.id}
+                      value={driver.id}
+                      disabled={!driver.available || !driver.verified}
+                    >
+                      {driver.name}{' '}
+                      {driver.vehiclePlateNumber ? `(${driver.vehiclePlateNumber})` : ''}
+                      {!driver.available && ' (Unavailable)'}
+                      {!driver.verified && ' (Unverified)'}
+                    </option>
+                  ))}
+                </select>
                 {drivers.length === 0 && (
                   <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
                     No available drivers found. Please register a driver first.
@@ -644,14 +669,30 @@ const AdminDispatch = () => {
               </div>
 
               <div>
-                <Select
-                  label="Vehicle *"
-                  options={vehicleOptions}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Vehicle *
+                </label>
+                <select
                   value={formData.vehicleId}
                   onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
                   required
-                  placeholder={vehicles.length === 0 ? 'No vehicles available' : 'Select a vehicle'}
-                />
+                >
+                  <option value="">
+                    {vehicles.length === 0 ? 'No vehicles available' : 'Select a vehicle'}
+                  </option>
+                  {vehicles.map((vehicle) => (
+                    <option
+                      key={vehicle.id}
+                      value={vehicle.id}
+                      disabled={vehicle.status !== 'AVAILABLE'}
+                    >
+                      {vehicle.vehicleNumber} - {vehicle.brand || ''} {vehicle.model || ''} (
+                      {vehicle.plateNumber || 'N/A'})
+                      {vehicle.status !== 'AVAILABLE' && ` (${vehicle.status})`}
+                    </option>
+                  ))}
+                </select>
                 {vehicles.length === 0 && (
                   <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
                     No available vehicles found. Please add a vehicle first.
@@ -660,20 +701,22 @@ const AdminDispatch = () => {
               </div>
 
               <div>
-                <Select
-                  label="Priority"
-                  options={[
-                    { value: 0, label: 'Normal' },
-                    { value: 1, label: 'High' },
-                    { value: 2, label: 'Urgent' },
-                  ]}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Priority
+                </label>
+                <select
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
-                />
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                >
+                  <option value="0">Normal</option>
+                  <option value="1">High</option>
+                  <option value="2">Urgent</option>
+                </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Notes
                 </label>
                 <textarea
