@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../../../../features/auth/hooks/useAuth'
 import ThemeToggle from '../../common/ThemeToggle/ThemeToggle'
 import LanguageSelector from '../../common/LanguageSelector/LanguageSelector'
@@ -16,12 +16,61 @@ const Navbar = () => {
     navigate('/login')
   }
 
-  const menu = [
+  // Helper function to get dashboard path based on user role
+  const getDashboardPath = () => {
+    if (!user?.role) return '/client/dashboard'
+
+    switch (user.role) {
+      case 'SUPER_ADMIN':
+        return '/super-admin/dashboard'
+      case 'ADMIN':
+        return '/admin/dashboard'
+      case 'DRIVER':
+        return '/driver/dashboard'
+      case 'CLIENT':
+      default:
+        return '/client/dashboard'
+    }
+  }
+
+  // Helper function to get notification redirect path based on user role
+  const getNotificationRedirectPath = () => {
+    if (!user?.role) return '/client/notifications'
+
+    switch (user.role) {
+      case 'SUPER_ADMIN':
+        return '/super-admin/notifications'
+      case 'ADMIN':
+        return '/admin/notifications'
+      case 'DRIVER':
+        return '/driver/notifications'
+      case 'CLIENT':
+      default:
+        return '/client/notifications'
+    }
+  }
+
+  // Public menu items
+  const publicMenu = [
     { label: 'Home', path: '/' },
     { label: 'Pricing', path: '/pricing' },
     { label: 'About', path: '/about' },
     { label: 'Contact', path: '/contact' },
   ]
+
+  // Get the appropriate menu based on authentication status
+  const getMenuItems = () => {
+    if (isAuthenticated) {
+      // Add dashboard link for authenticated users
+      return [
+        { label: 'Dashboard', path: getDashboardPath(), icon: LayoutDashboard },
+        ...publicMenu,
+      ]
+    }
+    return publicMenu
+  }
+
+  const menuItems = getMenuItems()
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700">
@@ -33,18 +82,19 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          {menu.map((item) => (
+          {menuItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors ${
+                `text-sm font-medium transition-colors flex items-center gap-1 ${
                   isActive
                     ? 'text-blue-600 dark:text-blue-400'
                     : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
                 }`
               }
             >
+              {item.icon && <item.icon size={16} />}
               {item.label}
             </NavLink>
           ))}
@@ -52,7 +102,7 @@ const Navbar = () => {
 
         {/* Right side actions */}
         <div className="flex items-center space-x-3">
-          {isAuthenticated && <NotificationBell />}
+          {isAuthenticated && <NotificationBell redirectPath={getNotificationRedirectPath()} />}
           <LanguageSelector />
           <ThemeToggle />
 
@@ -97,19 +147,20 @@ const Navbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 space-y-3">
-          {menu.map((item) => (
+          {menuItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
-                `block py-2 text-sm font-medium transition ${
+                `block py-2 text-sm font-medium transition flex items-center gap-2 ${
                   isActive
                     ? 'text-blue-600 dark:text-blue-400'
                     : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
                 }`
               }
             >
+              {item.icon && <item.icon size={18} />}
               {item.label}
             </NavLink>
           ))}

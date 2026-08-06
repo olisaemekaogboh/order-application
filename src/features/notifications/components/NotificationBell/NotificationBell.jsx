@@ -8,7 +8,7 @@ import { useAuth } from '../../../auth/hooks/useAuth'
 
 export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
 
   const {
@@ -40,22 +40,50 @@ export const NotificationBell = () => {
     setIsOpen(!isOpen)
   }
 
+  // Helper function to get role-specific notification route
+  const getNotificationRoute = () => {
+    if (!user?.role) return '/client/notifications'
+
+    const roleRoutes = {
+      SUPER_ADMIN: '/super-admin/notifications',
+      ADMIN: '/admin/notifications',
+      DRIVER: '/driver/notifications',
+      CLIENT: '/client/notifications',
+    }
+
+    return roleRoutes[user.role] || '/client/notifications'
+  }
+
   const handleNotificationClick = async (notification) => {
     if (!notification.read) {
       await markAsRead(notification.id)
     }
     if (notification.actionUrl) {
-      navigate(notification.actionUrl)
+      // If the action URL is absolute, use it directly
+      // If it's relative, we need to ensure it's role-appropriate
+      const url = notification.actionUrl.startsWith('/')
+        ? notification.actionUrl
+        : `/${notification.actionUrl}`
+      navigate(url)
     } else if (notification.type?.startsWith('REVIEW_')) {
-      navigate('/admin/reviews')
+      // Determine which review page based on role
+      const role = user?.role || 'CLIENT'
+      const reviewRoutes = {
+        SUPER_ADMIN: '/super-admin/reviews',
+        ADMIN: '/admin/reviews',
+        DRIVER: '/driver/reviews',
+        CLIENT: '/client/reviews',
+      }
+      navigate(reviewRoutes[role] || '/admin/reviews')
     } else {
-      navigate(NOTIFICATION_ROUTES.LIST)
+      // Use role-specific notification list route
+      navigate(getNotificationRoute())
     }
     setIsOpen(false)
   }
 
   const handleViewAll = () => {
-    navigate(NOTIFICATION_ROUTES.LIST)
+    navigate(getNotificationRoute())
     setIsOpen(false)
   }
 

@@ -76,7 +76,7 @@ export const driverService = {
   },
 
   // ============================================
-  // PUBLIC/DRIVER ENDPOINTS (for driver users)
+  // PUBLIC/DRIVER ENDPOINTS
   // ============================================
 
   registerDriver: async (data) => {
@@ -84,23 +84,22 @@ export const driverService = {
     return response.data.data
   },
 
-  // ✅ FIXED: Get available drivers with pagination
+  // Get available drivers with pagination
   getAvailableDrivers: async (page = 0, size = 20) => {
     const response = await axiosInstance.get('/drivers/available', {
       params: { page, size },
     })
-    // Return the content array directly or the whole response
     return response.data.data?.content || response.data.data || []
   },
 
-  // ✅ FIXED: Get available drivers for assignment (returns List<DriverDTO>)
+  // Get available drivers for assignment
   getAvailableDriversForAssignment: async (vehicleType = null) => {
     const params = vehicleType ? { vehicleType } : {}
     const response = await axiosInstance.get('/drivers/available/assignment', { params })
     return response.data.data || []
   },
 
-  // ✅ Get all drivers
+  // Get all drivers with pagination
   getAllDrivers: async (page = 0, size = 20, sortBy = 'createdAt', sortDirection = 'DESC') => {
     const response = await axiosInstance.get('/drivers', {
       params: { page, size, sortBy, sortDirection },
@@ -118,9 +117,69 @@ export const driverService = {
     return response.data.data
   },
 
+  // ============================================
+  // CURRENT DRIVER (Authenticated)
+  // ============================================
+
+  getMyProfile: async () => {
+    const response = await axiosInstance.get('/drivers/me')
+    return response.data.data
+  },
+
+  getDriverProfile: async () => {
+    const response = await axiosInstance.get('/drivers/me')
+    return response.data.data
+  },
+
+  getMyEarnings: async () => {
+    const response = await axiosInstance.get('/drivers/me/earnings')
+    return response.data.data
+  },
+
+  getDriverEarnings: async () => {
+    const response = await axiosInstance.get('/drivers/me/earnings')
+    return response.data.data
+  },
+
+  getMyEarningsPaginated: async (page = 0, size = 20) => {
+    const response = await axiosInstance.get('/drivers/me/earnings/paginated', {
+      params: { page, size },
+    })
+    return response.data.data
+  },
+
+  getMyTotalEarnings: async () => {
+    const response = await axiosInstance.get('/drivers/me/earnings/total')
+    return response.data.data
+  },
+
+  getTotalEarnings: async () => {
+    const response = await axiosInstance.get('/drivers/me/earnings/total')
+    return response.data.data
+  },
+
+  getMyUnpaidEarnings: async () => {
+    const response = await axiosInstance.get('/drivers/me/earnings/unpaid')
+    return response.data.data
+  },
+
+  getUnpaidEarnings: async () => {
+    const response = await axiosInstance.get('/drivers/me/earnings/unpaid')
+    return response.data.data
+  },
+
   updateMyAvailability: async (available) => {
-    const response = await axiosInstance.put('/drivers/me/availability', { available })
-    return response.data
+    const response = await axiosInstance.put('/drivers/me/availability', {
+      available,
+    })
+    return response.data.data
+  },
+
+  updateAvailability: async (available) => {
+    const response = await axiosInstance.put('/drivers/me/availability', {
+      available,
+    })
+    return response.data.data
   },
 
   updateMyLocation: async (latitude, longitude, location) => {
@@ -129,16 +188,15 @@ export const driverService = {
       longitude,
       location,
     })
-    return response.data
-  },
-
-  getMyEarnings: async () => {
-    const response = await axiosInstance.get('/drivers/me/earnings')
     return response.data.data
   },
 
-  getMyProfile: async () => {
-    const response = await axiosInstance.get('/drivers/me')
+  updateLocation: async (latitude, longitude, location) => {
+    const response = await axiosInstance.put('/drivers/me/location', {
+      latitude,
+      longitude,
+      location,
+    })
     return response.data.data
   },
 
@@ -147,9 +205,39 @@ export const driverService = {
     return response.data.data
   },
 
+  // ============================================
+  // DRIVER EARNINGS (with pagination)
+  // ============================================
+
+  getDriverEarningsPaginated: async (driverId, page = 0, size = 10) => {
+    const response = await axiosInstance.get(`/drivers/${driverId}/earnings/paginated`, {
+      params: { page, size },
+    })
+    return response.data.data
+  },
+
+  getDriverTotalEarnings: async (driverId) => {
+    const response = await axiosInstance.get(`/drivers/${driverId}/earnings/total`)
+    return response.data.data
+  },
+
+  getDriverUnpaidEarnings: async (driverId) => {
+    const response = await axiosInstance.get(`/drivers/${driverId}/earnings/unpaid`)
+    return response.data.data
+  },
+
+  // ============================================
+  // DRIVER ACTIONS
+  // ============================================
+
   deleteDriver: async (id) => {
     const response = await axiosInstance.delete(`/drivers/${id}`)
     return response.data
+  },
+
+  getDashboard: async () => {
+    const response = await axiosInstance.get('/drivers/me/dashboard')
+    return response.data.data
   },
 }
 

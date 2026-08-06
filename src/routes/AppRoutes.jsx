@@ -76,7 +76,8 @@ import DriverDashboard from '../features/drivers/components/DriverDashboard/Driv
 import DriverOrders from '../features/drivers/components/DriverOrders/DriverOrders'
 import DriverEarnings from '../features/drivers/components/DriverEarnings/DriverEarnings'
 import DriverProfile from '../features/drivers/components/DriverProfile/DriverProfile'
-
+import DriverTracking from '../features/drivers/components/DriverTracking/DriverTracking'
+import DriverDispatches from '../features/drivers/components/DriverDispatches/DriverDispatches'
 // ---- Reports ----
 import ReportGenerator from '../features/reports/components/ReportGenerator/ReportGenerator'
 
@@ -159,13 +160,17 @@ function AppRoutes() {
       <Route element={<PrivateRoute allowedRoles={['DRIVER']} />}>
         <Route element={<DashboardLayout />}>
           <Route path="/driver/dashboard" element={<DriverDashboard />} />
+
           <Route path="/driver/orders" element={<DriverOrders />} />
-          <Route path="/driver/orders/:id" element={<Placeholder title="Driver Order Details" />} />
-          <Route path="/driver/assigned-orders" element={<DriverOrders />} />
-          <Route path="/driver/history" element={<DriverOrders />} />
+
+          <Route path="/driver/dispatches" element={<DriverDispatches />} />
+
+          <Route path="/driver/tracking" element={<DriverTracking />} />
+
           <Route path="/driver/profile" element={<DriverProfile />} />
-          <Route path="/driver/change-password" element={<Placeholder title="Change Password" />} />
+
           <Route path="/driver/earnings" element={<DriverEarnings />} />
+
           <Route path="/driver/notifications" element={<NotificationPage />} />
         </Route>
       </Route>

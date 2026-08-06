@@ -12,7 +12,7 @@ import { NotificationProvider } from './features/notifications/components/Notifi
 import { OrderProvider } from './features/orders/components/OrderProvider/OrderProvider'
 import { store } from './store/store'
 import './assets/styles/global.css'
-
+import 'leaflet/dist/leaflet.css'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

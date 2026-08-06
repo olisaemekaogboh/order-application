@@ -126,6 +126,38 @@ export const dispatchService = {
     const response = await axiosInstance.post(`/dispatch/${dispatchId}/complete`)
     return response.data.data
   },
+  // ===== CURRENT DRIVER DISPATCHES =====
+  getMyDispatches: async (params = {}) => {
+    const response = await axiosInstance.get('/dispatch/me', {
+      params,
+    })
+
+    return response.data.data
+  },
+  acceptDispatch: async (dispatchId) => {
+    const response = await axiosInstance.post(`/dispatch/${dispatchId}/accept`)
+    return response.data.data
+  },
+
+  rejectDispatch: async (dispatchId, reason) => {
+    const response = await axiosInstance.post(`/dispatch/${dispatchId}/reject`, null, {
+      params: { reason },
+    })
+    return response.data.data
+  },
+
+  updateTrackingStatus: async (trackingId, status) => {
+    const response = await axiosInstance.put('/driver/tracking/status', {
+      trackingId,
+      status,
+    })
+    return response.data.data
+  },
+
+  completeDispatch: async (dispatchId) => {
+    const response = await axiosInstance.post(`/dispatch/${dispatchId}/complete`)
+    return response.data.data
+  },
 }
 
 export default dispatchService
