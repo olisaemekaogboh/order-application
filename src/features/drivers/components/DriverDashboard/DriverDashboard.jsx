@@ -48,14 +48,16 @@ import Progress from '@/shared/components/ui/Progress/Progress'
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
+// ============================================================
+// ONE AUTHORITATIVE STATUS MAPPING
+// ============================================================
+
 const STATUS_LABELS = {
   WAITING_DRIVER_ACCEPTANCE: 'Waiting for Driver',
   DRIVER_ACCEPTED: 'Driver Accepted',
-  DRIVER_EN_ROUTE_TO_PICKUP: 'En Route to Pickup',
-  ARRIVED_PICKUP: 'Arrived at Pickup',
-  PICKED_UP: 'Picked Up',
-  IN_TRANSIT: 'In Transit',
-  ARRIVED_DESTINATION: 'Arrived at Destination',
+  EN_ROUTE_PICKUP: 'En Route to Pickup',
+  PICKUP_COMPLETED: 'Pickup Completed',
+  DELIVERY_IN_PROGRESS: 'Delivery In Progress',
   DELIVERED: 'Delivered',
   FAILED: 'Failed',
   CANCELLED: 'Cancelled',
@@ -64,28 +66,32 @@ const STATUS_LABELS = {
 const STATUS_COLORS = {
   WAITING_DRIVER_ACCEPTANCE: 'bg-yellow-500',
   DRIVER_ACCEPTED: 'bg-blue-500',
-  DRIVER_EN_ROUTE_TO_PICKUP: 'bg-purple-500',
-  ARRIVED_PICKUP: 'bg-indigo-500',
-  PICKED_UP: 'bg-indigo-500',
-  IN_TRANSIT: 'bg-orange-500',
-  ARRIVED_DESTINATION: 'bg-orange-500',
+  EN_ROUTE_PICKUP: 'bg-purple-500',
+  PICKUP_COMPLETED: 'bg-indigo-500',
+  DELIVERY_IN_PROGRESS: 'bg-orange-500',
   DELIVERED: 'bg-green-500',
   FAILED: 'bg-red-500',
   CANCELLED: 'bg-gray-500',
 }
 
+// ============================================================
+// PROGRESS STEPS MATCHING BACKEND WORKFLOW
+// ============================================================
+
 const PROGRESS_STEPS = [
   { status: 'WAITING_DRIVER_ACCEPTANCE', label: 'Assigned', icon: '📋' },
   { status: 'DRIVER_ACCEPTED', label: 'Accepted', icon: '✅' },
-  { status: 'DRIVER_EN_ROUTE_TO_PICKUP', label: 'En Route', icon: '🚗' },
-  { status: 'ARRIVED_PICKUP', label: 'Arrived', icon: '📍' },
-  { status: 'PICKED_UP', label: 'Picked Up', icon: '📦' },
-  { status: 'IN_TRANSIT', label: 'Delivering', icon: '🚚' },
-  { status: 'ARRIVED_DESTINATION', label: 'Arrived', icon: '🏁' },
+  { status: 'EN_ROUTE_PICKUP', label: 'En Route', icon: '🚗' },
+  { status: 'PICKUP_COMPLETED', label: 'Picked Up', icon: '📦' },
+  { status: 'DELIVERY_IN_PROGRESS', label: 'Delivering', icon: '🚚' },
   { status: 'DELIVERED', label: 'Delivered', icon: '🎉' },
 ]
 
 const STATUS_ORDER = PROGRESS_STEPS.map((s) => s.status)
+
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
 
 const getCurrentStepIndex = (status) => {
   const index = STATUS_ORDER.indexOf(status)
@@ -116,18 +122,19 @@ const getStatusIcon = (status) => {
   const icons = {
     WAITING_DRIVER_ACCEPTANCE: '⏳',
     DRIVER_ACCEPTED: '✅',
-    DRIVER_EN_ROUTE_TO_PICKUP: '🚗',
-    ARRIVED_PICKUP: '📍',
+    EN_ROUTE_PICKUP: '🚗',
     PICKUP_COMPLETED: '📦',
-    PICKED_UP: '📦',
-    IN_TRANSIT: '🚚',
-    ARRIVED_DESTINATION: '🏁',
+    DELIVERY_IN_PROGRESS: '🚚',
     DELIVERED: '🎉',
     FAILED: '❌',
     CANCELLED: '🚫',
   }
   return icons[status] || '📌'
 }
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 
 const DriverDashboard = () => {
   const navigate = useNavigate()
@@ -137,28 +144,18 @@ const DriverDashboard = () => {
     dashboard,
     deliveryProgress,
     hasActiveDispatch,
+    isUpdating,
     loadDashboard,
     acceptDispatch,
     rejectDispatch,
-    startPickup,
-    arrivePickup,
+    startTrip,
     pickupCompleted,
     startDelivery,
-    arriveDestination,
     completeDelivery,
     updateLocation,
   } = useDriverDashboard()
 
   const { location } = useDriverLocation(dashboard.currentDispatch, updateLocation)
-
-  const [actionStates, setActionStates] = useState({
-    startingTrip: false,
-    arrivingPickup: false,
-    pickingUp: false,
-    startingDelivery: false,
-    arrivingDestination: false,
-    completingDelivery: false,
-  })
 
   useEffect(() => {
     loadDashboard()
@@ -204,177 +201,89 @@ const DriverDashboard = () => {
     return data
   }, [earnings])
 
-  const hasTripStarted = useMemo(() => {
-    if (!currentDispatch) return false
-    const currentIndex = getCurrentStepIndex(currentDispatch.status)
-    const acceptedIndex = getCurrentStepIndex('DRIVER_ACCEPTED')
-    return currentIndex > acceptedIndex
-  }, [currentDispatch])
+  // ============================================================
+  // ACTION HANDLERS - USING CORRECT HOOK METHODS
+  // ============================================================
 
-  // Handle actions
-  const handleAccept = () => {
-    if (currentDispatch?.id) {
-      acceptDispatch(currentDispatch.id)
-    }
-  }
-
-  const handleReject = () => {
-    if (currentDispatch?.id) {
-      rejectDispatch(currentDispatch.id)
-    }
-  }
-
-  // ============================================
-  // ✅ FIXED: Single set of handler functions
-  // ============================================
-
-  const handleStartPickup = async () => {
-    // ✅ Check if already in the target status
-    if (
-      trackingSession?.status === 'DRIVER_EN_ROUTE_TO_PICKUP' ||
-      currentDispatch?.status === 'DRIVER_EN_ROUTE_TO_PICKUP'
-    ) {
-      console.log('Already en route to pickup, skipping')
-      return
-    }
-
-    if (actionStates.startingTrip) {
-      return
-    }
-
-    setActionStates((prev) => ({ ...prev, startingTrip: true }))
+  const handleAccept = async () => {
+    if (!currentDispatch?.id || isUpdating) return
     try {
-      await startPickup()
-    } finally {
-      setActionStates((prev) => ({ ...prev, startingTrip: false }))
+      await acceptDispatch(currentDispatch.id)
+    } catch (error) {
+      console.error('Failed to accept dispatch:', error)
     }
   }
 
-  const handleArrivePickup = async () => {
-    // ✅ Check if already in target status
-    if (
-      trackingSession?.status === 'ARRIVED_PICKUP' ||
-      currentDispatch?.status === 'ARRIVED_PICKUP'
-    ) {
-      console.log('Already arrived at pickup, skipping')
-      return
-    }
-
-    if (actionStates.arrivingPickup) {
-      return
-    }
-
-    setActionStates((prev) => ({ ...prev, arrivingPickup: true }))
+  const handleReject = async () => {
+    if (!currentDispatch?.id || isUpdating) return
     try {
-      await arrivePickup()
-    } finally {
-      setActionStates((prev) => ({ ...prev, arrivingPickup: false }))
+      await rejectDispatch(currentDispatch.id)
+    } catch (error) {
+      console.error('Failed to reject dispatch:', error)
+    }
+  }
+
+  const handleStartTrip = async () => {
+    if (isUpdating) return
+    try {
+      await startTrip()
+    } catch (error) {
+      console.error('Failed to start trip:', error)
     }
   }
 
   const handlePickupCompleted = async () => {
-    // ✅ Check if already in target status
-    if (trackingSession?.status === 'PICKED_UP' || currentDispatch?.status === 'PICKED_UP') {
-      console.log('Already picked up, skipping')
-      return
-    }
-
-    if (actionStates.pickingUp) {
-      return
-    }
-
-    setActionStates((prev) => ({ ...prev, pickingUp: true }))
+    if (isUpdating) return
     try {
       await pickupCompleted()
-    } finally {
-      setActionStates((prev) => ({ ...prev, pickingUp: false }))
+    } catch (error) {
+      console.error('Failed to complete pickup:', error)
     }
   }
 
   const handleStartDelivery = async () => {
-    // ✅ Check if already in target status
-    if (trackingSession?.status === 'IN_TRANSIT' || currentDispatch?.status === 'IN_TRANSIT') {
-      console.log('Already in transit, skipping')
-      return
-    }
-
-    if (actionStates.startingDelivery) {
-      return
-    }
-
-    setActionStates((prev) => ({ ...prev, startingDelivery: true }))
+    if (isUpdating) return
     try {
       await startDelivery()
-    } finally {
-      setActionStates((prev) => ({ ...prev, startingDelivery: false }))
-    }
-  }
-
-  const handleArriveDestination = async () => {
-    // ✅ Check if already in target status
-    if (
-      trackingSession?.status === 'ARRIVED_DESTINATION' ||
-      currentDispatch?.status === 'ARRIVED_DESTINATION'
-    ) {
-      console.log('Already arrived at destination, skipping')
-      return
-    }
-
-    if (actionStates.arrivingDestination) {
-      return
-    }
-
-    setActionStates((prev) => ({ ...prev, arrivingDestination: true }))
-    try {
-      await arriveDestination()
-    } finally {
-      setActionStates((prev) => ({ ...prev, arrivingDestination: false }))
+    } catch (error) {
+      console.error('Failed to start delivery:', error)
     }
   }
 
   const handleCompleteDelivery = async () => {
-    // ✅ Check if already in target status
-    if (trackingSession?.status === 'DELIVERED' || currentDispatch?.status === 'DELIVERED') {
-      console.log('Already delivered, skipping')
-      return
-    }
-
-    if (actionStates.completingDelivery) {
-      return
-    }
-
-    setActionStates((prev) => ({ ...prev, completingDelivery: true }))
+    if (isUpdating) return
     try {
       await completeDelivery()
-    } finally {
-      setActionStates((prev) => ({ ...prev, completingDelivery: false }))
+    } catch (error) {
+      console.error('Failed to complete delivery:', error)
     }
   }
 
-  // ✅ Fixed: Check if a step is completed or current
-  const getStepStatus = (stepStatus) => {
-    if (!currentDispatch) return 'pending'
-    const currentIndex = getCurrentStepIndex(currentDispatch.status)
-    const stepIndex = getCurrentStepIndex(stepStatus)
-
-    if (stepIndex < currentIndex) return 'completed'
-    if (stepIndex === currentIndex) return 'current'
-    return 'pending'
-  }
+  // ============================================================
+  // RENDER ACTION BUTTONS - FOLLOWS BACKEND WORKFLOW
+  // ============================================================
 
   const renderActionButtons = () => {
     if (!currentDispatch) return null
-
-    console.log('🔍 Current status:', currentDispatch.status)
 
     switch (currentDispatch.status) {
       case 'WAITING_DRIVER_ACCEPTANCE':
         return (
           <>
-            <Button className="flex-1 bg-green-600" onClick={handleAccept}>
+            <Button
+              className="flex-1 bg-green-600 hover:bg-green-700"
+              onClick={handleAccept}
+              disabled={isUpdating}
+            >
+              {isUpdating ? <Spinner size="sm" className="mr-2" /> : null}
               Accept Dispatch
             </Button>
-            <Button variant="destructive" className="flex-1" onClick={handleReject}>
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={handleReject}
+              disabled={isUpdating}
+            >
               Reject
             </Button>
           </>
@@ -382,15 +291,11 @@ const DriverDashboard = () => {
 
       case 'DRIVER_ACCEPTED':
         return (
-          <Button
-            className="w-full"
-            onClick={handleStartPickup}
-            disabled={actionStates.startingTrip}
-          >
-            {actionStates.startingTrip ? (
+          <Button className="w-full" onClick={handleStartTrip} disabled={isUpdating}>
+            {isUpdating ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Starting...
+                Starting Trip...
               </>
             ) : (
               'Start Trip'
@@ -398,35 +303,13 @@ const DriverDashboard = () => {
           </Button>
         )
 
-      case 'DRIVER_EN_ROUTE_TO_PICKUP':
+      case 'EN_ROUTE_PICKUP':
         return (
-          <Button
-            className="w-full"
-            onClick={handleArrivePickup}
-            disabled={actionStates.arrivingPickup}
-          >
-            {actionStates.arrivingPickup ? (
+          <Button className="w-full" onClick={handlePickupCompleted} disabled={isUpdating}>
+            {isUpdating ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Updating...
-              </>
-            ) : (
-              'Arrived at Pickup'
-            )}
-          </Button>
-        )
-
-      case 'ARRIVED_PICKUP':
-        return (
-          <Button
-            className="w-full"
-            onClick={handlePickupCompleted}
-            disabled={actionStates.pickingUp}
-          >
-            {actionStates.pickingUp ? (
-              <>
-                <Spinner size="sm" className="mr-2" />
-                Updating...
+                Completing Pickup...
               </>
             ) : (
               'Pickup Completed'
@@ -434,17 +317,17 @@ const DriverDashboard = () => {
           </Button>
         )
 
-      case 'PICKED_UP':
+      case 'PICKUP_COMPLETED':
         return (
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700"
             onClick={handleStartDelivery}
-            disabled={actionStates.startingDelivery}
+            disabled={isUpdating}
           >
-            {actionStates.startingDelivery ? (
+            {isUpdating ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Starting...
+                Starting Delivery...
               </>
             ) : (
               'Start Delivery'
@@ -452,35 +335,17 @@ const DriverDashboard = () => {
           </Button>
         )
 
-      case 'IN_TRANSIT':
+      case 'DELIVERY_IN_PROGRESS':
         return (
           <Button
-            className="w-full"
-            onClick={handleArriveDestination}
-            disabled={actionStates.arrivingDestination}
-          >
-            {actionStates.arrivingDestination ? (
-              <>
-                <Spinner size="sm" className="mr-2" />
-                Updating...
-              </>
-            ) : (
-              'Arrived at Destination'
-            )}
-          </Button>
-        )
-
-      case 'ARRIVED_DESTINATION':
-        return (
-          <Button
-            className="w-full bg-green-700"
+            className="w-full bg-green-700 hover:bg-green-800"
             onClick={handleCompleteDelivery}
-            disabled={actionStates.completingDelivery}
+            disabled={isUpdating}
           >
-            {actionStates.completingDelivery ? (
+            {isUpdating ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Completing...
+                Completing Delivery...
               </>
             ) : (
               'Complete Delivery'
@@ -495,11 +360,29 @@ const DriverDashboard = () => {
           </Button>
         )
 
+      case 'FAILED':
+        return (
+          <Button className="w-full bg-red-500" disabled>
+            ❌ Delivery Failed
+          </Button>
+        )
+
+      case 'CANCELLED':
+        return (
+          <Button className="w-full bg-gray-400" disabled>
+            🚫 Dispatch Cancelled
+          </Button>
+        )
+
       default:
-        console.warn('⚠️ Unknown status:', currentDispatch.status)
+        console.warn('Unknown dispatch status:', currentDispatch.status)
         return null
     }
   }
+
+  // ============================================================
+  // RENDER
+  // ============================================================
 
   if (loading) {
     return (
@@ -525,7 +408,7 @@ const DriverDashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Welcome Header */}
+      {/* Welcome Header - unchanged */}
       <div className="bg-gradient-to-r from-green-300 to-indigo-300 dark:from-blue-800 dark:to-indigo-900 rounded-2xl p-6 text-white shadow-xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>
@@ -547,7 +430,7 @@ const DriverDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - unchanged */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-blue-200 dark:border-blue-800">
           <CardContent className="p-4">
@@ -614,7 +497,7 @@ const DriverDashboard = () => {
         </Card>
       </div>
 
-      {/* Charts Row */}
+      {/* Charts Row - unchanged */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -722,7 +605,7 @@ const DriverDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Live Tracking Card */}
+        {/* Live Tracking Card - unchanged */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -771,7 +654,7 @@ const DriverDashboard = () => {
                     </Badge>
                   </div>
                   <div className="absolute bottom-3 right-3 text-xs text-gray-500 bg-white/80 dark:bg-gray-800/80 px-2 py-1 rounded-md backdrop-blur-sm">
-                    {location.latitude && location.longitude ? (
+                    {location.latitude != null && location.longitude != null ? (
                       <>
                         {location.latitude.toFixed(6)}°, {location.longitude.toFixed(6)}°
                       </>
@@ -858,10 +741,10 @@ const DriverDashboard = () => {
               <div className="relative overflow-x-auto pb-2">
                 <div className="flex items-center gap-2 min-w-max">
                   {PROGRESS_STEPS.map((step, index) => {
-                    const status = getStepStatus(step.status)
-                    const isCompleted = status === 'completed'
-                    const isCurrent = status === 'current'
-                    const isPending = status === 'pending'
+                    const currentIndex = getCurrentStepIndex(currentDispatch?.status || '')
+                    const stepIndex = getCurrentStepIndex(step.status)
+                    const isCompleted = stepIndex < currentIndex
+                    const isCurrent = stepIndex === currentIndex
 
                     return (
                       <React.Fragment key={step.status}>
@@ -920,18 +803,21 @@ const DriverDashboard = () => {
                       {getStatusLabel(currentDispatch.status)}
                     </p>
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                      {currentDispatch.status === 'WAITING_DRIVER_ACCEPTANCE' &&
+                        'Review the dispatch and accept it to begin.'}
                       {currentDispatch.status === 'DRIVER_ACCEPTED' &&
-                        'Click "Start Trip" to begin your journey'}
-                      {currentDispatch.status === 'DRIVER_EN_ROUTE_TO_PICKUP' &&
-                        'You are on your way to pick up the package'}
-                      {currentDispatch.status === 'ARRIVED_PICKUP' &&
-                        'You have arrived at the pickup location'}
-                      {currentDispatch.status === 'PICKED_UP' && 'Package has been picked up'}
-                      {currentDispatch.status === 'IN_TRANSIT' &&
-                        'Package is on the way to destination'}
-                      {currentDispatch.status === 'ARRIVED_DESTINATION' &&
-                        'You have arrived at the destination'}
-                      {currentDispatch.status === 'DELIVERED' && 'Delivery completed! 🎉'}
+                        'Click "Start Trip" to begin your journey to the pickup location.'}
+                      {currentDispatch.status === 'EN_ROUTE_PICKUP' &&
+                        'You are on your way to the pickup location. Complete the pickup when the package is collected.'}
+                      {currentDispatch.status === 'PICKUP_COMPLETED' &&
+                        'Package has been picked up. Start delivery to continue.'}
+                      {currentDispatch.status === 'DELIVERY_IN_PROGRESS' &&
+                        'Package is currently being delivered to the destination.'}
+                      {currentDispatch.status === 'DELIVERED' &&
+                        'Delivery completed successfully! 🎉'}
+                      {currentDispatch.status === 'FAILED' && 'This delivery has failed.'}
+                      {currentDispatch.status === 'CANCELLED' &&
+                        'This dispatch has been cancelled.'}
                     </p>
                   </div>
                 </div>
@@ -941,7 +827,7 @@ const DriverDashboard = () => {
         </Card>
       )}
 
-      {/* Recent Dispatches & Earnings */}
+      {/* Recent Dispatches & Earnings - unchanged */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -1027,7 +913,7 @@ const DriverDashboard = () => {
         </Card>
       </div>
 
-      {/* Driver Status & Notifications */}
+      {/* Driver Status & Notifications - unchanged */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -1106,7 +992,7 @@ const DriverDashboard = () => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - unchanged */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
